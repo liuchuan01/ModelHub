@@ -14,6 +14,7 @@ help:
 	@echo "  db-init         - 初始化数据库"
 	@echo "  db-sample       - 插入示例数据"
 	@echo "  db-update-models- 更新模型表结构（添加parent_id）"
+	@echo "  db-check        - 检查数据库约束"
 	@echo "  db-migrate      - 运行数据库迁移"
 
 # 编译应用程序
@@ -68,6 +69,11 @@ db-update-models:
 	@echo "更新模型表结构..."
 	@psql -U postgres -d model_collection -f sql-script/06_add_parent_id_to_models.sql
 	@echo "模型表结构更新完成"
+
+# 检查数据库约束
+db-check:
+	@echo "检查数据库约束..."
+	@psql -U postgres -d model_collection -f sql-script/07_check_constraints.sql
 
 # 运行数据库迁移
 db-migrate: build

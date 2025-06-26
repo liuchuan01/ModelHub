@@ -20,4 +20,5 @@ jwt:
 app:
   name: "model_collect"
   version: "1.0.0"
-  environment: "development" 
+  environment: "development"
+  enable_auto_migrate: false  # 是否启用GORM自动迁移，生产环境建议设为false 

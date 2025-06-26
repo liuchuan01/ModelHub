@@ -38,9 +38,10 @@ type JWTConfig struct {
 }
 
 type AppConfig struct {
-	Name        string
-	Version     string
-	Environment string
+	Name              string
+	Version           string
+	Environment       string
+	EnableAutoMigrate bool
 }
 
 func Load() (*Config, error) {
@@ -54,10 +55,10 @@ func Load() (*Config, error) {
 			Mode: getEnv("GIN_MODE", "debug"),
 		},
 		Database: DatabaseConfig{
-			Host:         getEnv("DB_HOST", "localhost"),
+			Host:         getEnv("DB_HOST", "111.229.113.12"),
 			Port:         getEnvAsInt("DB_PORT", 5432),
-			User:         getEnv("DB_USER", "postgres"),
-			Password:     getEnv("DB_PASSWORD", "password"),
+			User:         getEnv("DB_USER", "root"),
+			Password:     getEnv("DB_PASSWORD", "model_collect"),
 			DBName:       getEnv("DB_NAME", "model_collection"),
 			SSLMode:      getEnv("DB_SSLMODE", "disable"),
 			MaxOpenConns: getEnvAsInt("DB_MAX_OPEN_CONNS", 10),
@@ -68,9 +69,10 @@ func Load() (*Config, error) {
 			ExpireHours: getEnvAsInt("JWT_EXPIRE_HOURS", 24),
 		},
 		App: AppConfig{
-			Name:        getEnv("APP_NAME", "model_collect"),
-			Version:     getEnv("APP_VERSION", "1.0.0"),
-			Environment: getEnv("APP_ENV", "development"),
+			Name:              getEnv("APP_NAME", "model_collect"),
+			Version:           getEnv("APP_VERSION", "1.0.0"),
+			Environment:       getEnv("APP_ENV", "development"),
+			EnableAutoMigrate: getEnvAsBool("ENABLE_AUTO_MIGRATE", false),
 		},
 	}
 
@@ -99,6 +101,15 @@ func getEnvAsInt(key string, defaultValue int) int {
 	if value := os.Getenv(key); value != "" {
 		if intValue, err := strconv.Atoi(value); err == nil {
 			return intValue
+		}
+	}
+	return defaultValue
+}
+
+func getEnvAsBool(key string, defaultValue bool) bool {
+	if value := os.Getenv(key); value != "" {
+		if boolValue, err := strconv.ParseBool(value); err == nil {
+			return boolValue
 		}
 	}
 	return defaultValue

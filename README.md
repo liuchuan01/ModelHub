@@ -98,6 +98,7 @@ JWT_EXPIRE_HOURS=24
 # 应用配置
 APP_ENV=development
 APP_NAME=model_collect
+ENABLE_AUTO_MIGRATE=false  # 是否启用GORM自动迁移（推荐false）
 ```
 
 ### 5. 运行服务
@@ -262,6 +263,38 @@ GET /api/health
 - 用户收藏功能
 - 购买状态管理
 - 统计分析功能
+
+## 故障排除
+
+### 数据库自动迁移错误
+
+如果您看到类似以下的错误：
+```
+Warning: Auto migration failed: failed to auto migrate: ERROR: constraint "uni_users_username" of relation "users" does not exist
+```
+
+这是因为GORM自动迁移与现有数据库结构不兼容。解决方案：
+
+1. **推荐方法：使用SQL脚本初始化数据库**
+   ```bash
+   # 确保ENABLE_AUTO_MIGRATE=false或未设置
+   make db-init
+   ```
+
+2. **检查约束名称**
+   ```bash
+   psql -U postgres -d model_collection -f sql-script/07_check_constraints.sql
+   ```
+
+3. **更新现有数据库结构**
+   ```bash
+   make db-update-models
+   ```
+
+### 环境变量说明
+
+- `ENABLE_AUTO_MIGRATE=true`: 启用GORM自动迁移（仅开发环境推荐）
+- `ENABLE_AUTO_MIGRATE=false`: 禁用自动迁移，使用SQL脚本（生产环境推荐）
 
 ## 许可证
 

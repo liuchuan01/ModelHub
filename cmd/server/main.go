@@ -28,10 +28,16 @@ func main() {
 	}
 	defer database.Close()
 
-	// 自动迁移数据库表结构（开发环境使用）
-	if cfg.App.Environment == "development" {
+	// 自动迁移数据库表结构（仅在明确启用时使用）
+	// 注意：生产环境建议使用SQL迁移脚本而不是自动迁移
+	if cfg.App.Environment == "development" && cfg.App.EnableAutoMigrate {
+		log.Println("正在执行数据库自动迁移...")
 		if err := database.AutoMigrate(); err != nil {
-			log.Printf("Warning: Auto migration failed: %v", err)
+			log.Printf("⚠️  数据库自动迁移失败: %v", err)
+			log.Println("💡 建议使用SQL脚本手动创建数据库表结构")
+			log.Println("💡 可以运行: make db-init 来初始化数据库")
+		} else {
+			log.Println("✅ 数据库自动迁移完成")
 		}
 	}
 
