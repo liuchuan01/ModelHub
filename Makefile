@@ -2,8 +2,8 @@
 
 .PHONY: help build run clean test deps db-init db-migrate dev
 
-# 默认环境变量文件路径
-ENV_FILE ?= ./config.yaml
+# 默认环境变量文件路径（可选）
+ENV_FILE ?= 
 
 # 默认目标
 help:
@@ -11,7 +11,7 @@ help:
 	@echo "  build           - 编译后端应用程序"
 	@echo "  run             - 运行后端应用程序"
 	@echo "                   可选: ENV_FILE=/path/to/file.env"
-	@echo "                   示例: make run ENV_FILE=~/my-config/prod.env"
+	@echo "                   示例: make run ENV_FILE=~/configs/prod.env"
 	@echo "  dev             - 后端开发模式运行"
 	@echo "                   可选: ENV_FILE=/path/to/file.env"
 	@echo "  clean           - 清理编译文件"
@@ -36,10 +36,14 @@ help:
 	@echo "  setup           - 完整环境设置"
 	@echo "  dev-all         - 同时启动前后端开发服务器"
 	@echo ""
-	@echo "📝 环境变量文件使用示例:"
-	@echo "  make run ENV_FILE=~/production.env"
-	@echo "  make dev ENV_FILE=/etc/myapp/staging.env"
-	@echo "  make run ENV_FILE=./configs/local.env"
+	@echo "📝 环境变量配置说明:"
+	@echo "  1. 直接设置环境变量:"
+	@echo "     export DB_HOST=localhost DB_USER=myuser"
+	@echo "     make run"
+	@echo ""
+	@echo "  2. 使用环境变量文件:"
+	@echo "     make run ENV_FILE=~/configs/prod.env"
+	@echo "     make dev ENV_FILE=./local.env"
 
 # 编译应用程序
 build:
@@ -50,24 +54,18 @@ build:
 # 运行应用程序
 run: build
 	@echo "启动服务器..."
-	@if [ -f "$(ENV_FILE)" ]; then \
-		echo "使用环境变量文件: $(ENV_FILE)"; \
-		CONFIG_FILE="$(ENV_FILE)" ./bin/server; \
+	@if [ -n "$(ENV_FILE)" ]; then \
+		bash -c 'source ./scripts/load_env.sh "$(ENV_FILE)" && exec ./bin/server'; \
 	else \
-		echo "⚠️  环境变量文件不存在: $(ENV_FILE)"; \
-		echo "使用默认配置启动..."; \
 		./bin/server; \
 	fi
 
 # 开发模式运行（直接运行源码）
 dev:
 	@echo "开发模式启动..."
-	@if [ -f "$(ENV_FILE)" ]; then \
-		echo "使用环境变量文件: $(ENV_FILE)"; \
-		CONFIG_FILE="$(ENV_FILE)" go run cmd/server/main.go; \
+	@if [ -n "$(ENV_FILE)" ]; then \
+		bash -c 'source ./scripts/load_env.sh "$(ENV_FILE)" && exec go run cmd/server/main.go'; \
 	else \
-		echo "⚠️  环境变量文件不存在: $(ENV_FILE)"; \
-		echo "使用默认配置启动..."; \
 		go run cmd/server/main.go; \
 	fi
 

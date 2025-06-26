@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-
-	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -45,21 +43,7 @@ type AppConfig struct {
 }
 
 func Load() (*Config, error) {
-	// 尝试从指定的配置文件加载环境变量
-	configFile := os.Getenv("CONFIG_FILE")
-	if configFile != "" {
-		// 如果指定了配置文件路径，尝试加载它
-		if err := godotenv.Load(configFile); err != nil {
-			fmt.Printf("⚠️  无法加载指定的配置文件 %s: %v\n", configFile, err)
-			fmt.Println("将尝试使用默认配置文件或环境变量...")
-		} else {
-			fmt.Printf("✅ 成功加载配置文件: %s\n", configFile)
-		}
-	} else {
-		// 尝试加载默认的 .env 文件
-		godotenv.Load()
-	}
-
+	// 从环境变量加载配置
 	cfg := &Config{
 		Server: ServerConfig{
 			Host: getEnv("SERVER_HOST", "localhost"),
@@ -69,15 +53,15 @@ func Load() (*Config, error) {
 		Database: DatabaseConfig{
 			Host:         getEnv("DB_HOST", "localhost"),
 			Port:         getEnvAsInt("DB_PORT", 5432),
-			User:         getEnv("DB_USER", "your_username"),
-			Password:     getEnv("DB_PASSWORD", "your_password"),
-			DBName:       getEnv("DB_NAME", "your_db"),
+			User:         os.Getenv("DB_USER"),
+			Password:     os.Getenv("DB_PASSWORD"),
+			DBName:       os.Getenv("DB_NAME"),
 			SSLMode:      getEnv("DB_SSLMODE", "disable"),
 			MaxOpenConns: getEnvAsInt("DB_MAX_OPEN_CONNS", 10),
 			MaxIdleConns: getEnvAsInt("DB_MAX_IDLE_CONNS", 5),
 		},
 		JWT: JWTConfig{
-			Secret:      getEnv("JWT_SECRET", "your-secret-key-here"),
+			Secret:      os.Getenv("JWT_SECRET"),
 			ExpireHours: getEnvAsInt("JWT_EXPIRE_HOURS", 24),
 		},
 		App: AppConfig{
@@ -86,6 +70,11 @@ func Load() (*Config, error) {
 			Environment:       getEnv("APP_ENV", "development"),
 			EnableAutoMigrate: getEnvAsBool("ENABLE_AUTO_MIGRATE", false),
 		},
+	}
+
+	// 验证必需的环境变量
+	if err := validateConfig(cfg); err != nil {
+		return nil, fmt.Errorf("配置验证失败: %w", err)
 	}
 
 	return cfg, nil
@@ -100,6 +89,30 @@ func (c *Config) GetDSN() string {
 		c.Database.DBName,
 		c.Database.SSLMode,
 	)
+}
+
+// 验证必需的配置项
+func validateConfig(cfg *Config) error {
+	missingVars := []string{}
+
+	if cfg.Database.User == "" {
+		missingVars = append(missingVars, "DB_USER")
+	}
+	if cfg.Database.Password == "" {
+		missingVars = append(missingVars, "DB_PASSWORD")
+	}
+	if cfg.Database.DBName == "" {
+		missingVars = append(missingVars, "DB_NAME")
+	}
+	if cfg.JWT.Secret == "" {
+		missingVars = append(missingVars, "JWT_SECRET")
+	}
+
+	if len(missingVars) > 0 {
+		return fmt.Errorf("以下必需的环境变量未设置: %v", missingVars)
+	}
+
+	return nil
 }
 
 func getEnv(key, defaultValue string) string {
