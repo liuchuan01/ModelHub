@@ -2,6 +2,8 @@ import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import styled from 'styled-components'
 import Sidebar from './components/Sidebar'
+import { useAuth } from './hooks/useAuth'
+import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
 import ExplorePage from './pages/ExplorePage'
 import ModelDetailPage from './pages/ModelDetailPage'
@@ -25,7 +27,15 @@ const MainContent = styled.main`
   }
 `
 
-function App() {
+const LoadingContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  color: var(--color-gray-600);
+`
+
+const AuthenticatedApp: React.FC = () => {
   return (
     <AppContainer>
       <Sidebar />
@@ -40,6 +50,20 @@ function App() {
       </MainContent>
     </AppContainer>
   )
+}
+
+function App() {
+  const { isAuthenticated, isLoading } = useAuth()
+
+  if (isLoading) {
+    return (
+      <LoadingContainer>
+        <p>正在加载...</p>
+      </LoadingContainer>
+    )
+  }
+
+  return isAuthenticated ? <AuthenticatedApp /> : <LoginPage />
 }
 
 export default App 

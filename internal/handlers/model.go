@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -315,5 +316,297 @@ func (h *ModelHandler) GetModelVariants(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"variants": variants,
 		"total":    len(variants),
+	})
+}
+
+// FavoriteModel 收藏模型
+func (h *ModelHandler) FavoriteModel(c *gin.Context) {
+	idStr := c.Param("id")
+	modelID, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "无效的模型ID",
+		})
+		return
+	}
+
+	// 从JWT中获取用户ID
+	userIDInterface, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "用户未登录",
+		})
+		return
+	}
+	userID := userIDInterface.(uint)
+
+	// 检查模型是否存在
+	var model models.Model
+	if err := database.DB.First(&model, modelID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "模型不存在",
+		})
+		return
+	}
+
+	// 检查是否已经收藏
+	var favorite models.UserModelFavorite
+	if err := database.DB.Where("user_id = ? AND model_id = ?", userID, modelID).First(&favorite).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{
+			"error": "模型已经收藏",
+		})
+		return
+	}
+
+	// 创建收藏记录
+	var favoriteRequest struct {
+		Note string `json:"note"`
+	}
+	c.ShouldBindJSON(&favoriteRequest)
+
+	favorite = models.UserModelFavorite{
+		UserID:        userID,
+		ModelID:       uint(modelID),
+		FavoriteNotes: &favoriteRequest.Note,
+	}
+
+	if err := database.DB.Create(&favorite).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "收藏失败",
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message":  "收藏成功",
+		"favorite": favorite,
+	})
+}
+
+// UnfavoriteModel 取消收藏模型
+func (h *ModelHandler) UnfavoriteModel(c *gin.Context) {
+	idStr := c.Param("id")
+	modelID, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "无效的模型ID",
+		})
+		return
+	}
+
+	// 从JWT中获取用户ID
+	userIDInterface, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "用户未登录",
+		})
+		return
+	}
+	userID := userIDInterface.(uint)
+
+	// 删除收藏记录
+	result := database.DB.Where("user_id = ? AND model_id = ?", userID, modelID).Delete(&models.UserModelFavorite{})
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "取消收藏失败",
+		})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "收藏记录不存在",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "取消收藏成功",
+	})
+}
+
+// MarkAsPurchased 标记模型为已购买
+func (h *ModelHandler) MarkAsPurchased(c *gin.Context) {
+	idStr := c.Param("id")
+	modelID, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "无效的模型ID",
+		})
+		return
+	}
+
+	// 从JWT中获取用户ID
+	userIDInterface, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "用户未登录",
+		})
+		return
+	}
+	userID := userIDInterface.(uint)
+
+	// 检查模型是否存在
+	var model models.Model
+	if err := database.DB.First(&model, modelID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "模型不存在",
+		})
+		return
+	}
+
+	// 检查是否已经购买
+	var purchase models.UserModelPurchase
+	if err := database.DB.Where("user_id = ? AND model_id = ?", userID, modelID).First(&purchase).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{
+			"error": "模型已经标记为购买",
+		})
+		return
+	}
+
+	// 创建购买记录
+	var purchaseRequest struct {
+		PurchasedDate  string  `json:"purchased_date"`
+		PurchasedPrice float64 `json:"purchased_price"`
+		Note           string  `json:"note"`
+	}
+	if err := c.ShouldBindJSON(&purchaseRequest); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "请求参数错误",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	// 解析时间
+	var purchasedDate *time.Time
+	if purchaseRequest.PurchasedDate != "" {
+		if parsedTime, err := time.Parse("2006-01-02", purchaseRequest.PurchasedDate); err == nil {
+			purchasedDate = &parsedTime
+		}
+	}
+
+	var purchasedPrice *float64
+	if purchaseRequest.PurchasedPrice > 0 {
+		purchasedPrice = &purchaseRequest.PurchasedPrice
+	}
+
+	purchase = models.UserModelPurchase{
+		UserID:         userID,
+		ModelID:        uint(modelID),
+		Purchased:      true,
+		PurchasedDate:  purchasedDate,
+		PurchasedPrice: purchasedPrice,
+		PurchaseNotes:  &purchaseRequest.Note,
+	}
+
+	if err := database.DB.Create(&purchase).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "标记购买失败",
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message":  "标记购买成功",
+		"purchase": purchase,
+	})
+}
+
+// UnmarkAsPurchased 取消购买标记
+func (h *ModelHandler) UnmarkAsPurchased(c *gin.Context) {
+	idStr := c.Param("id")
+	modelID, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "无效的模型ID",
+		})
+		return
+	}
+
+	// 从JWT中获取用户ID
+	userIDInterface, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "用户未登录",
+		})
+		return
+	}
+	userID := userIDInterface.(uint)
+
+	// 删除购买记录
+	result := database.DB.Where("user_id = ? AND model_id = ?", userID, modelID).Delete(&models.UserModelPurchase{})
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "取消购买标记失败",
+		})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "购买记录不存在",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "取消购买标记成功",
+	})
+}
+
+// GetUserFavorites 获取用户收藏的模型列表
+func (h *ModelHandler) GetUserFavorites(c *gin.Context) {
+	// 从JWT中获取用户ID
+	userIDInterface, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "用户未登录",
+		})
+		return
+	}
+	userID := userIDInterface.(uint)
+
+	var favorites []models.UserModelFavorite
+	if err := database.DB.Preload("Model.Manufacturer").
+		Where("user_id = ?", userID).
+		Find(&favorites).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "获取收藏列表失败",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"favorites": favorites,
+		"total":     len(favorites),
+	})
+}
+
+// GetUserPurchases 获取用户购买的模型列表
+func (h *ModelHandler) GetUserPurchases(c *gin.Context) {
+	// 从JWT中获取用户ID
+	userIDInterface, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "用户未登录",
+		})
+		return
+	}
+	userID := userIDInterface.(uint)
+
+	var purchases []models.UserModelPurchase
+	if err := database.DB.Preload("Model.Manufacturer").
+		Where("user_id = ?", userID).
+		Find(&purchases).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "获取购买列表失败",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"purchases": purchases,
+		"total":     len(purchases),
 	})
 }

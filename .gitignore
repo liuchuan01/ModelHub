@@ -48,4 +48,33 @@ logs/
 
 # Temporary files
 tmp/
-temp/ 
+temp/
+
+# Frontend (Node.js/React)
+frontend/node_modules/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/lerna-debug.log*
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+frontend/.nyc_output/
+frontend/.cache/
+frontend/.parcel-cache/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/.svelte-kit/
+
+# Frontend environment
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+# Frontend IDE
+frontend/.vscode/settings.json
+frontend/.idea/ 

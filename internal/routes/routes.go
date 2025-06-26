@@ -66,8 +66,18 @@ func SetupRoutes(cfg *config.Config) *gin.Engine {
 			// 价格历史相关（后续可扩展）
 			// priceHistory := authorized.Group("/price-history")
 
-			// 用户收藏和购买状态相关（后续可扩展）
-			// userActions := authorized.Group("/user")
+			// 用户收藏和购买状态相关
+			userActions := authorized.Group("/user")
+			{
+				userActions.GET("/favorites", modelHandler.GetUserFavorites)
+				userActions.GET("/purchases", modelHandler.GetUserPurchases)
+			}
+
+			// 模型收藏和购买操作
+			models.POST("/:id/favorite", modelHandler.FavoriteModel)
+			models.DELETE("/:id/favorite", modelHandler.UnfavoriteModel)
+			models.POST("/:id/purchase", modelHandler.MarkAsPurchased)
+			models.DELETE("/:id/purchase", modelHandler.UnmarkAsPurchased)
 		}
 	}
 
