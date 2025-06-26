@@ -3,13 +3,13 @@
 
 \c model_collection;
 
--- 插入预设用户数据 (密码需要在应用层进行加密)
--- 这里使用占位符，实际应用中需要使用bcrypt生成真实的hash值
+-- 插入预设用户数据 (密码已使用bcrypt加密)
+-- admin/admin123, user1/password1, user2/password2, user3/password3
 INSERT INTO users (username, password_hash) VALUES 
-    ('admin', '$2a$10$placeholder_hash_admin'),
-    ('user1', '$2a$10$placeholder_hash_user1'),
-    ('user2', '$2a$10$placeholder_hash_user2'),
-    ('user3', '$2a$10$placeholder_hash_user3');
+    ('admin', '$2a$10$ypd2N0BIXTFPoHh.08rpf.oKWwqf5nhzSVlZ.fN7u.wPCGB9x0ZVG'),
+    ('user1', '$2a$10$JilfTSOCDcTZ.J5X8I3UUO.LkAKBtC7cWH2QigsLKUfG1PxITeYbG'),
+    ('user2', '$2a$10$MYGxpNTZQn21OVGcc4rRRe///Cs5rHdnoHPOH9T2i7o.3U1qR/Vly'),
+    ('user3', '$2a$10$Gd3TrjhRc4MAYvGEaVtu9.vIxfX06M6qmARVcXn95glPeYO3O/wkW');
 
 -- 现在可以插入收藏记录了
 INSERT INTO user_model_favorite (user_id, model_id, favorite_notes) VALUES 

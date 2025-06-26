@@ -21,6 +21,7 @@ help:
 	@echo "🗄️  数据库命令:"
 	@echo "  db-init         - 初始化数据库"
 	@echo "  db-sample       - 插入示例数据"
+	@echo "  db-add-users    - 添加测试用户账户"
 	@echo "  db-update-models- 更新模型表结构（添加parent_id）"
 	@echo "  db-check        - 检查数据库约束"
 	@echo "  db-migrate      - 运行数据库迁移"
@@ -86,6 +87,12 @@ db-update-models:
 db-check:
 	@echo "检查数据库约束..."
 	@psql -U postgres -d model_collection -f sql-script/07_check_constraints.sql
+
+# 添加测试用户（使用正确的bcrypt哈希密码）
+db-add-users:
+	@echo "添加测试用户（admin/admin123, user1/password1, user2/password2）..."
+	@psql -U postgres -d model_collection -f sql-script/03_add_users.sql
+	@echo "测试用户添加完成"
 
 # 运行数据库迁移
 db-migrate: build

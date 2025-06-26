@@ -14,16 +14,14 @@ interface ModelCardProps {
 const Card = styled.div`
   background: var(--color-white);
   border-radius: var(--radius-md);
-  padding: 20px;
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-normal);
-  cursor: pointer;
+  padding: 16px;
   border: 1px solid var(--color-gray-200);
+  transition: all var(--transition-fast);
+  cursor: pointer;
   
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
     border-color: var(--color-gray-300);
+    box-shadow: var(--shadow-sm);
   }
 `
 
@@ -90,37 +88,40 @@ const ActionBar = styled.div`
 
 const ActionButton = styled.button<{ $variant?: 'favorite' | 'purchase' }>`
   flex: 1;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: var(--radius-sm);
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 400;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
   transition: all var(--transition-fast);
   
   ${props => props.$variant === 'favorite' ? `
-    background: ${props.theme?.isFavorited ? 'var(--color-red-50)' : 'var(--color-gray-100)'};
+    background: ${props.theme?.isFavorited ? 'var(--color-red-50)' : 'var(--color-white)'};
     color: ${props.theme?.isFavorited ? 'var(--color-red-600)' : 'var(--color-gray-600)'};
     border: 1px solid ${props.theme?.isFavorited ? 'var(--color-red-200)' : 'var(--color-gray-200)'};
     
     &:hover {
-      background: ${props.theme?.isFavorited ? 'var(--color-red-100)' : 'var(--color-gray-200)'};
+      background: ${props.theme?.isFavorited ? 'var(--color-red-100)' : 'var(--color-gray-50)'};
+      border-color: ${props.theme?.isFavorited ? 'var(--color-red-300)' : 'var(--color-gray-300)'};
     }
   ` : `
-    background: ${props.theme?.isPurchased ? 'var(--color-green-50)' : 'var(--color-blue-50)'};
-    color: ${props.theme?.isPurchased ? 'var(--color-green-600)' : 'var(--color-blue-600)'};
-    border: 1px solid ${props.theme?.isPurchased ? 'var(--color-green-200)' : 'var(--color-blue-200)'};
+    background: ${props.theme?.isPurchased ? 'var(--color-green-50)' : 'var(--color-white)'};
+    color: ${props.theme?.isPurchased ? 'var(--color-green-600)' : 'var(--color-gray-600)'};
+    border: 1px solid ${props.theme?.isPurchased ? 'var(--color-green-200)' : 'var(--color-gray-200)'};
     
     &:hover {
-      background: ${props.theme?.isPurchased ? 'var(--color-green-100)' : 'var(--color-blue-100)'};
+      background: ${props.theme?.isPurchased ? 'var(--color-green-100)' : 'var(--color-gray-50)'};
+      border-color: ${props.theme?.isPurchased ? 'var(--color-green-300)' : 'var(--color-gray-300)'};
     }
   `}
   
   svg {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
+    stroke-width: 1.5;
   }
   
   &:disabled {

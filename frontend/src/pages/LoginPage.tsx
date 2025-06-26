@@ -9,17 +9,17 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--color-gray-50) 0%, var(--color-blue-50) 100%);
+  background: var(--color-gray-50);
   padding: 24px;
 `
 
 const LoginCard = styled.div`
   background: var(--color-white);
   border-radius: var(--radius-lg);
-  padding: 48px;
-  box-shadow: var(--shadow-lg);
+  padding: 40px;
+  box-shadow: var(--shadow-md);
   width: 100%;
-  max-width: 400px;
+  max-width: 380px;
   border: 1px solid var(--color-gray-200);
 `
 
@@ -64,14 +64,15 @@ const InputGroup = styled.div`
     border-radius: var(--radius-md);
     font-size: 0.875rem;
     transition: border-color var(--transition-fast);
+    background: var(--color-white);
     
     &:focus {
-      border-color: var(--color-blue-500);
+      border-color: var(--color-gray-600);
       outline: none;
     }
     
     &::placeholder {
-      color: var(--color-gray-500);
+      color: var(--color-gray-400);
     }
   }
   
@@ -86,9 +87,9 @@ const InputGroup = styled.div`
 `
 
 const SubmitButton = styled.button`
-  background: var(--color-blue-500);
+  background: var(--color-black);
   color: white;
-  border: none;
+  border: 1px solid var(--color-black);
   border-radius: var(--radius-md);
   padding: 12px 24px;
   font-size: 0.875rem;
@@ -97,14 +98,16 @@ const SubmitButton = styled.button`
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background-color var(--transition-fast);
+  transition: all var(--transition-fast);
   
   &:hover:not(:disabled) {
-    background: var(--color-blue-600);
+    background: var(--color-gray-800);
+    border-color: var(--color-gray-800);
   }
   
   &:disabled {
     background: var(--color-gray-400);
+    border-color: var(--color-gray-400);
     cursor: not-allowed;
   }
   
@@ -176,11 +179,14 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('Login form submitted:', credentials)
+    
     try {
-      await login(credentials)
+      const result = await login(credentials)
+      console.log('Login result:', result)
+      console.log('Navigating to home page...')
       navigate('/')
     } catch (error) {
-      // 错误已经在useAuth中处理
       console.error('Login failed:', error)
     }
   }

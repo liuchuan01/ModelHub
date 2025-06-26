@@ -11,7 +11,7 @@ const FavoritesPage: React.FC = () => {
   return (
     <Container>
       <h1>我的收藏</h1>
-      <p>收藏列表页面 - 开发中...</p>
+      <p>收藏页面 - 开发中...</p>
     </Container>
   )
 }

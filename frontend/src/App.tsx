@@ -53,7 +53,9 @@ const AuthenticatedApp: React.FC = () => {
 }
 
 function App() {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading, user } = useAuth()
+
+  console.log('App render:', { isAuthenticated, isLoading, user })
 
   if (isLoading) {
     return (

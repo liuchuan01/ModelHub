@@ -1,11 +1,14 @@
 import React from 'react'
 import styled from 'styled-components'
-import { Package, Plus, TrendingUp, Star, ShoppingBag } from 'lucide-react'
+import { Package, Plus, TrendingUp, Star, ShoppingBag, User } from 'lucide-react'
+import { useAuth } from '../hooks/useAuth'
 
 const HomeContainer = styled.div`
   padding: 48px;
   max-width: 1200px;
   margin: 0 auto;
+  background: var(--color-white);
+  min-height: 100vh;
   
   @media (max-width: 768px) {
     padding: 24px;
@@ -31,6 +34,50 @@ const Header = styled.header`
     font-size: 1.125rem;
     color: var(--color-gray-600);
     font-weight: 300;
+    margin-bottom: 24px;
+  }
+`
+
+const WelcomeCard = styled.div`
+  background: var(--color-gray-50);
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  max-width: 360px;
+  margin: 0 auto;
+  
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-gray-800);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  
+  .welcome-text {
+    text-align: left;
+    
+    .greeting {
+      font-size: 0.875rem;
+      font-weight: 400;
+      color: var(--color-gray-600);
+      margin-bottom: 2px;
+    }
+    
+    .username {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-gray-900);
+    }
   }
 `
 
@@ -43,35 +90,36 @@ const StatsGrid = styled.div`
 
 const StatCard = styled.div`
   background: var(--color-white);
-  padding: 32px;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  padding: 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-gray-200);
   text-align: center;
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  transition: all var(--transition-fast);
   
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
+    border-color: var(--color-gray-300);
+    box-shadow: var(--shadow-sm);
   }
   
   .icon {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 16px;
-    color: var(--color-blue-500);
+    width: 32px;
+    height: 32px;
+    margin: 0 auto 12px;
+    color: var(--color-gray-700);
+    stroke-width: 1.5;
   }
   
   .number {
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: 600;
-    color: var(--color-gray-900);
-    margin-bottom: 8px;
+    color: var(--color-black);
+    margin-bottom: 6px;
   }
   
   .label {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     color: var(--color-gray-600);
-    font-weight: 500;
+    font-weight: 400;
   }
 `
 
@@ -88,26 +136,27 @@ const ActionSection = styled.section`
 `
 
 const ActionButton = styled.button`
-  background: var(--color-blue-500);
+  background: var(--color-black);
   color: white;
-  padding: 16px 32px;
+  padding: 12px 24px;
   border-radius: var(--radius-md);
-  font-size: 1rem;
+  border: 1px solid var(--color-black);
+  font-size: 0.875rem;
   font-weight: 500;
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  transition: all var(--transition-normal);
+  gap: 8px;
+  transition: all var(--transition-fast);
   
   &:hover {
-    background: var(--color-blue-600);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    background: var(--color-gray-800);
+    border-color: var(--color-gray-800);
   }
   
   svg {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
+    stroke-width: 1.5;
   }
 `
 
@@ -148,32 +197,49 @@ const SeriesGrid = styled.div`
 
 const SeriesCard = styled.div`
   background: var(--color-white);
-  padding: 24px;
+  padding: 20px;
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-gray-200);
   text-align: center;
-  transition: all var(--transition-normal);
+  transition: all var(--transition-fast);
   cursor: pointer;
   
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    border-color: var(--color-gray-300);
+    box-shadow: var(--shadow-sm);
   }
   
   .series-name {
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-weight: 600;
-    color: var(--color-gray-900);
-    margin-bottom: 8px;
+    color: var(--color-black);
+    margin-bottom: 6px;
   }
   
   .series-count {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     color: var(--color-gray-600);
+    font-weight: 400;
   }
 `
 
 const HomePage: React.FC = () => {
+  const { user } = useAuth()
+
+  // 获取用户名首字母作为头像
+  const getAvatarText = (username?: string) => {
+    if (!username) return 'U'
+    return username.charAt(0).toUpperCase()
+  }
+
+  // 获取问候语
+  const getGreeting = () => {
+    const hour = new Date().getHours()
+    if (hour < 12) return '早上好'
+    if (hour < 18) return '下午好'
+    return '晚上好'
+  }
+
   return (
     <HomeContainer>
       <Header>
@@ -182,6 +248,16 @@ const HomePage: React.FC = () => {
           我的高达模型收藏
         </h1>
         <p>探索、收藏、记录你的模型世界</p>
+        
+        <WelcomeCard>
+          <div className="avatar">
+            {getAvatarText(user?.username)}
+          </div>
+          <div className="welcome-text">
+            <div className="greeting">{getGreeting()}！</div>
+            <div className="username">{user?.username || '用户'}</div>
+          </div>
+        </WelcomeCard>
       </Header>
       
       <StatsGrid>
