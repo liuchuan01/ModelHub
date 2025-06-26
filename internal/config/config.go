@@ -45,8 +45,20 @@ type AppConfig struct {
 }
 
 func Load() (*Config, error) {
-	// 尝试加载 .env 文件
-	godotenv.Load()
+	// 尝试从指定的配置文件加载环境变量
+	configFile := os.Getenv("CONFIG_FILE")
+	if configFile != "" {
+		// 如果指定了配置文件路径，尝试加载它
+		if err := godotenv.Load(configFile); err != nil {
+			fmt.Printf("⚠️  无法加载指定的配置文件 %s: %v\n", configFile, err)
+			fmt.Println("将尝试使用默认配置文件或环境变量...")
+		} else {
+			fmt.Printf("✅ 成功加载配置文件: %s\n", configFile)
+		}
+	} else {
+		// 尝试加载默认的 .env 文件
+		godotenv.Load()
+	}
 
 	cfg := &Config{
 		Server: ServerConfig{
