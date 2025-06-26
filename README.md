@@ -26,7 +26,7 @@
 ```
 model_collect/
 ├── cmd/
-│   └── server/          # 应用程序入口
+│   └── server/          # 后端应用程序入口
 ├── internal/
 │   ├── config/          # 配置管理
 │   ├── database/        # 数据库连接
@@ -34,10 +34,19 @@ model_collect/
 │   ├── handlers/        # HTTP处理器
 │   ├── middleware/      # 中间件
 │   └── routes/          # 路由配置
+├── frontend/            # React前端项目
+│   ├── src/
+│   │   ├── components/  # React组件
+│   │   ├── pages/       # 页面组件
+│   │   ├── styles/      # 样式文件
+│   │   └── types/       # TypeScript类型
+│   ├── package.json     # 前端依赖
+│   └── README.md        # 前端说明
 ├── sql-script/          # 数据库脚本
 ├── docs/                # 项目文档
 ├── go.mod               # Go模块文件
-└── config.yaml          # 配置文件
+├── config.yaml          # 配置文件
+└── Makefile            # 构建脚本
 ```
 
 ## 快速开始
@@ -46,13 +55,20 @@ model_collect/
 
 确保已安装以下软件：
 - Go 1.21 或更高版本
+- Node.js 18 或更高版本
 - PostgreSQL 12 或更高版本
 
-### 2. 安装依赖
+### 2. 一键环境设置
 
 ```bash
-go mod tidy
+make setup
 ```
+
+这将自动完成：
+- 安装后端Go依赖
+- 安装前端Node.js依赖  
+- 初始化数据库
+- 插入示例数据
 
 ### 3. 数据库配置
 
@@ -101,13 +117,23 @@ APP_NAME=model_collect
 ENABLE_AUTO_MIGRATE=false  # 是否启用GORM自动迁移（推荐false）
 ```
 
-### 5. 运行服务
+### 5. 启动开发服务器
 
+#### 方式一：同时启动前后端
 ```bash
-go run cmd/server/main.go
+make dev-all
 ```
 
-服务将在 `http://localhost:8080` 启动。
+#### 方式二：分别启动
+```bash
+# 终端1: 启动后端 (http://localhost:8080)
+make dev
+
+# 终端2: 启动前端 (http://localhost:3000)  
+make frontend-dev
+```
+
+访问 `http://localhost:3000` 使用完整应用。
 
 ## API接口
 
@@ -295,6 +321,35 @@ Warning: Auto migration failed: failed to auto migrate: ERROR: constraint "uni_u
 
 - `ENABLE_AUTO_MIGRATE=true`: 启用GORM自动迁移（仅开发环境推荐）
 - `ENABLE_AUTO_MIGRATE=false`: 禁用自动迁移，使用SQL脚本（生产环境推荐）
+
+## 📊 项目状态
+
+### ✅ 已完成
+- **后端框架**：完整的Go Gin API服务
+- **数据库设计**：支持父子模型关系的PostgreSQL数据库
+- **前端架构**：React + TypeScript + Vite现代化前端框架
+- **设计系统**：简洁灰白主题配色方案
+- **开发工具**：统一的Makefile构建脚本
+
+### 🚧 开发中
+- **模型卡片组件**：极简商务风设计
+- **购买标记动画**：购物袋动画效果
+- **模型探索页面**：瀑布流布局
+- **API集成**：前后端数据连接
+
+### 🔄 计划中
+- **搜索筛选功能**：多维度模型筛选
+- **移动端优化**：响应式设计完善
+- **用户认证**：登录状态管理
+- **数据可视化**：价格走势图表
+
+## 🎯 设计亮点
+
+1. **博物馆式首页**：留白优雅，突出内容
+2. **父子模型关系**：支持换色衍生版本
+3. **购物袋动画**：增强交互愉悦感
+4. **瀑布流布局**：自然的内容展示
+5. **简洁配色**：现代化视觉体验
 
 ## 许可证
 

@@ -4,18 +4,30 @@
 
 # 默认目标
 help:
-	@echo "可用的命令:"
-	@echo "  build           - 编译应用程序"
-	@echo "  run             - 运行应用程序"
-	@echo "  dev             - 开发模式运行"
+	@echo "🔧 后端命令:"
+	@echo "  build           - 编译后端应用程序"
+	@echo "  run             - 运行后端应用程序"
+	@echo "  dev             - 后端开发模式运行"
 	@echo "  clean           - 清理编译文件"
-	@echo "  test            - 运行测试"
-	@echo "  deps            - 安装/更新依赖"
+	@echo "  test            - 运行后端测试"
+	@echo "  deps            - 安装/更新后端依赖"
+	@echo ""
+	@echo "🎨 前端命令:"
+	@echo "  frontend-install - 安装前端依赖"
+	@echo "  frontend-dev     - 前端开发模式"
+	@echo "  frontend-build   - 构建前端生产版本"
+	@echo "  frontend-preview - 预览前端构建"
+	@echo ""
+	@echo "🗄️  数据库命令:"
 	@echo "  db-init         - 初始化数据库"
 	@echo "  db-sample       - 插入示例数据"
 	@echo "  db-update-models- 更新模型表结构（添加parent_id）"
 	@echo "  db-check        - 检查数据库约束"
 	@echo "  db-migrate      - 运行数据库迁移"
+	@echo ""
+	@echo "🚀 全栈命令:"
+	@echo "  setup           - 完整环境设置"
+	@echo "  dev-all         - 同时启动前后端开发服务器"
 
 # 编译应用程序
 build:
@@ -93,7 +105,39 @@ lint:
 	@golangci-lint run
 	@echo "代码检查完成"
 
-# 完整的开发流程
-setup: deps db-init db-sample
-	@echo "开发环境设置完成！"
-	@echo "现在可以运行 'make dev' 启动开发服务器" 
+# 前端相关命令
+frontend-install:
+	@echo "正在安装前端依赖..."
+	@cd frontend && npm install
+	@echo "前端依赖安装完成"
+
+frontend-dev:
+	@echo "启动前端开发服务器..."
+	@cd frontend && npm run dev
+
+frontend-build:
+	@echo "构建前端生产版本..."
+	@cd frontend && npm run build
+	@echo "前端构建完成"
+
+frontend-preview:
+	@echo "预览前端构建..."
+	@cd frontend && npm run preview
+
+# 全栈开发命令
+setup: deps frontend-install db-init db-sample
+	@echo "✅ 完整开发环境设置完成！"
+	@echo ""
+	@echo "🚀 启动说明:"
+	@echo "  1. 后端: make dev"
+	@echo "  2. 前端: make frontend-dev"
+	@echo "  3. 同时启动: make dev-all"
+
+dev-all:
+	@echo "同时启动前后端开发服务器..."
+	@echo "后端: http://localhost:8080"
+	@echo "前端: http://localhost:3000"
+	@(trap 'kill 0' SIGINT; \
+		make dev & \
+		make frontend-dev & \
+		wait) 
