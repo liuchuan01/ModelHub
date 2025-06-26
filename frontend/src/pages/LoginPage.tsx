@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { LogIn, Lock, User } from 'lucide-react'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../contexts/AuthContext'
 
 const Container = styled.div`
   display: flex;
@@ -162,7 +161,6 @@ const TestAccounts = styled.div`
 `
 
 const LoginPage: React.FC = () => {
-  const navigate = useNavigate()
   const { login, isLoginLoading, loginError } = useAuth()
   const [credentials, setCredentials] = useState({
     username: '',
@@ -182,10 +180,8 @@ const LoginPage: React.FC = () => {
     console.log('Login form submitted:', credentials)
     
     try {
-      const result = await login(credentials)
-      console.log('Login result:', result)
-      console.log('Navigating to home page...')
-      navigate('/')
+      await login(credentials)
+      console.log('Login completed - AuthContext will handle state change')
     } catch (error) {
       console.error('Login failed:', error)
     }

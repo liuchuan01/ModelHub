@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import { Package, Plus, TrendingUp, Star, ShoppingBag, User } from 'lucide-react'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../contexts/AuthContext'
 
 const HomeContainer = styled.div`
   padding: 48px;

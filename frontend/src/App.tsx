@@ -2,7 +2,7 @@ import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import styled from 'styled-components'
 import Sidebar from './components/Sidebar'
-import { useAuth } from './hooks/useAuth'
+import { useAuth } from './contexts/AuthContext'
 import LoginPage from './pages/LoginPage'
 import HomePage from './pages/HomePage'
 import ExplorePage from './pages/ExplorePage'
@@ -55,9 +55,23 @@ const AuthenticatedApp: React.FC = () => {
 function App() {
   const { isAuthenticated, isLoading, user } = useAuth()
 
-  console.log('App render:', { isAuthenticated, isLoading, user })
+  console.log('App render:', { 
+    isAuthenticated, 
+    isLoading, 
+    user: user?.username || 'null',
+    timestamp: new Date().toISOString()
+  })
+
+  // 强制重新渲染检查
+  const [, forceUpdate] = React.useReducer(x => x + 1, 0)
+  
+  React.useEffect(() => {
+    console.log('App: Auth state changed, forcing update')
+    forceUpdate()
+  }, [isAuthenticated, user])
 
   if (isLoading) {
+    console.log('App: showing loading state')
     return (
       <LoadingContainer>
         <p>正在加载...</p>
@@ -65,7 +79,13 @@ function App() {
     )
   }
 
-  return isAuthenticated ? <AuthenticatedApp /> : <LoginPage />
+  if (isAuthenticated) {
+    console.log('App: user is authenticated, showing main app')
+    return <AuthenticatedApp />
+  } else {
+    console.log('App: user is not authenticated, showing login page')
+    return <LoginPage />
+  }
 }
 
 export default App 
