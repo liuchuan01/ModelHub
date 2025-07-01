@@ -18,6 +18,9 @@ var DB *gorm.DB
 // Initialize 初始化数据库连接
 func Initialize(cfg *config.Config) error {
 	dsn := cfg.GetDSN()
+	
+	// 添加调试日志
+	log.Printf("正在连接数据库，DSN: %s", dsn)
 
 	// 配置GORM
 	gormConfig := &gorm.Config{
@@ -48,6 +51,22 @@ func Initialize(cfg *config.Config) error {
 	// 测试连接
 	if err := sqlDB.Ping(); err != nil {
 		return fmt.Errorf("failed to ping database: %w", err)
+	}
+
+	// 检查当前连接的数据库
+	var currentDB string
+	if err := db.Raw("SELECT current_database()").Scan(&currentDB).Error; err != nil {
+		log.Printf("无法获取当前数据库名: %v", err)
+	} else {
+		log.Printf("成功连接到数据库: %s", currentDB)
+	}
+
+	// 检查users表是否存在
+	var tableExists bool
+	if err := db.Raw("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users')").Scan(&tableExists).Error; err != nil {
+		log.Printf("无法检查users表: %v", err)
+	} else {
+		log.Printf("users表是否存在: %v", tableExists)
 	}
 
 	DB = db

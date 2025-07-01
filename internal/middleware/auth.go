@@ -49,7 +49,7 @@ func JWTAuth(cfg *config.Config) gin.HandlerFunc {
 
 		if err != nil || !token.Valid {
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "无效的认证令牌",
+				"error": "用户未登录",
 			})
 			c.Abort()
 			return

@@ -81,14 +81,24 @@ func Load() (*Config, error) {
 }
 
 func (c *Config) GetDSN() string {
-	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		c.Database.Host,
-		c.Database.Port,
-		c.Database.User,
-		c.Database.Password,
-		c.Database.DBName,
-		c.Database.SSLMode,
-	)
+	if c.Database.Password != "" {
+		return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
+			c.Database.User,
+			c.Database.Password,
+			c.Database.Host,
+			c.Database.Port,
+			c.Database.DBName,
+			c.Database.SSLMode,
+		)
+	} else {
+		return fmt.Sprintf("postgres://%s@%s:%d/%s?sslmode=%s",
+			c.Database.User,
+			c.Database.Host,
+			c.Database.Port,
+			c.Database.DBName,
+			c.Database.SSLMode,
+		)
+	}
 }
 
 // 验证必需的配置项
@@ -98,9 +108,10 @@ func validateConfig(cfg *Config) error {
 	if cfg.Database.User == "" {
 		missingVars = append(missingVars, "DB_USER")
 	}
-	if cfg.Database.Password == "" {
-		missingVars = append(missingVars, "DB_PASSWORD")
-	}
+	// PostgreSQL 本地开发可能不需要密码，所以不验证 DB_PASSWORD
+	// if cfg.Database.Password == "" {
+	// 	missingVars = append(missingVars, "DB_PASSWORD")
+	// }
 	if cfg.Database.DBName == "" {
 		missingVars = append(missingVars, "DB_NAME")
 	}
