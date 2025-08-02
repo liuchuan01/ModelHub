@@ -1,5 +1,13 @@
 import axios from 'axios'
 
+// 创建一个自定义事件，用于通知认证状态变化
+export const authEvents = {
+  emit401Error: () => {
+    const event = new CustomEvent('auth:unauthorized')
+    window.dispatchEvent(event)
+  }
+}
+
 // 创建axios实例
 export const apiClient = axios.create({
   baseURL: '/api', // Vite代理会将/api转发到后端
@@ -29,12 +37,11 @@ apiClient.interceptors.response.use(
     return response
   },
   (error) => {
-    // 401错误 - 未授权，清除本地令牌
+    // 401错误 - 未授权，发出事件通知而不是直接重定向
     if (error.response?.status === 401) {
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('user_info')
-      // 可以在这里触发重新登录
-      window.location.href = '/login'
+      console.log('API: 收到401未授权响应，发出事件通知')
+      // 发出自定义事件，让AuthContext处理
+      authEvents.emit401Error()
     }
     
     // 处理网络错误

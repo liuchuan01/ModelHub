@@ -168,8 +168,9 @@ const ModelCard: React.FC<ModelCardProps> = ({
   showActions = true, 
   onClick 
 }) => {
-  const [isFavorited, setIsFavorited] = useState(false) // 实际应从props或context获取
-  const [isPurchased, setIsPurchased] = useState(false) // 实际应从props或context获取
+  // 从模型数据中获取收藏和购买状态
+  const isFavorited = !!model.user_favorites?.length
+  const isPurchased = !!model.user_purchases?.length
   
   const {
     favoriteModel,
@@ -191,10 +192,8 @@ const ModelCard: React.FC<ModelCardProps> = ({
     try {
       if (isFavorited) {
         await unfavoriteModel(model.id)
-        setIsFavorited(false)
       } else {
         await favoriteModel({ modelId: model.id })
-        setIsFavorited(true)
       }
     } catch (error) {
       console.error('Favorite action failed:', error)
@@ -207,7 +206,6 @@ const ModelCard: React.FC<ModelCardProps> = ({
     try {
       if (isPurchased) {
         await unmarkAsPurchased(model.id)
-        setIsPurchased(false)
       } else {
         // 购买动画效果
         setPurchaseAnimation.start({
@@ -229,7 +227,6 @@ const ModelCard: React.FC<ModelCardProps> = ({
             purchased_date: new Date().toISOString().split('T')[0]
           }
         })
-        setIsPurchased(true)
       }
     } catch (error) {
       console.error('Purchase action failed:', error)

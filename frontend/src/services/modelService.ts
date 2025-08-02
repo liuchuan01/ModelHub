@@ -53,15 +53,14 @@ export const modelService = {
 
   // 收藏模型
   favoriteModel: async (modelId: number, notes?: string): Promise<void> => {
-    await apiClient.post('/user/favorites', {
-      model_id: modelId,
-      favorite_notes: notes,
+    await apiClient.post(`/models/${modelId}/favorite`, {
+      note: notes,
     })
   },
 
   // 取消收藏
   unfavoriteModel: async (modelId: number): Promise<void> => {
-    await apiClient.delete(`/user/favorites/${modelId}`)
+    await apiClient.delete(`/models/${modelId}/favorite`)
   },
 
   // 标记为已购买
@@ -73,16 +72,16 @@ export const modelService = {
       purchase_notes?: string
     }
   ): Promise<void> => {
-    await apiClient.post('/user/purchases', {
-      model_id: modelId,
-      purchased: true,
-      ...purchaseData,
+    await apiClient.post(`/models/${modelId}/purchase`, {
+      purchased_date: purchaseData.purchased_date,
+      purchased_price: purchaseData.purchased_price,
+      note: purchaseData.purchase_notes,
     })
   },
 
   // 取消购买标记
   unmarkAsPurchased: async (modelId: number): Promise<void> => {
-    await apiClient.delete(`/user/purchases/${modelId}`)
+    await apiClient.delete(`/models/${modelId}/purchase`)
   },
 
   // 获取用户收藏列表

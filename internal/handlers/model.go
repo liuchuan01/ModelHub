@@ -331,7 +331,7 @@ func (h *ModelHandler) FavoriteModel(c *gin.Context) {
 	}
 
 	// 从JWT中获取用户ID
-	userIDInterface, exists := c.Get("userID")
+	userIDInterface, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "用户未登录",
@@ -395,7 +395,7 @@ func (h *ModelHandler) UnfavoriteModel(c *gin.Context) {
 	}
 
 	// 从JWT中获取用户ID
-	userIDInterface, exists := c.Get("userID")
+	userIDInterface, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "用户未登录",
@@ -437,7 +437,7 @@ func (h *ModelHandler) MarkAsPurchased(c *gin.Context) {
 	}
 
 	// 从JWT中获取用户ID
-	userIDInterface, exists := c.Get("userID")
+	userIDInterface, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "用户未登录",
@@ -525,7 +525,7 @@ func (h *ModelHandler) UnmarkAsPurchased(c *gin.Context) {
 	}
 
 	// 从JWT中获取用户ID
-	userIDInterface, exists := c.Get("userID")
+	userIDInterface, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "用户未登录",
@@ -558,7 +558,7 @@ func (h *ModelHandler) UnmarkAsPurchased(c *gin.Context) {
 // GetUserFavorites 获取用户收藏的模型列表
 func (h *ModelHandler) GetUserFavorites(c *gin.Context) {
 	// 从JWT中获取用户ID
-	userIDInterface, exists := c.Get("userID")
+	userIDInterface, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "用户未登录",
@@ -586,7 +586,7 @@ func (h *ModelHandler) GetUserFavorites(c *gin.Context) {
 // GetUserPurchases 获取用户购买的模型列表
 func (h *ModelHandler) GetUserPurchases(c *gin.Context) {
 	// 从JWT中获取用户ID
-	userIDInterface, exists := c.Get("userID")
+	userIDInterface, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "用户未登录",

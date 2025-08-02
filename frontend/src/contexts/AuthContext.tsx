@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { authService } from '../services/authService'
+import { authEvents } from '../services/api'
 import type { User, LoginRequest } from '../types'
 
 interface AuthContextType {
@@ -43,6 +44,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     
     setIsLoading(false)
     console.log('AuthProvider: Initialization complete', { token: !!token, user: storedUser?.username })
+  }, [])
+  
+  // 监听未授权事件
+  useEffect(() => {
+    console.log('AuthProvider: Setting up unauthorized event listener')
+    
+    const handleUnauthorized = () => {
+      console.log('AuthProvider: Received unauthorized event, logging out')
+      // 清除本地存储的认证信息
+      authService.logout()
+      // 更新状态
+      setIsAuthenticated(false)
+      setUser(null)
+      setLoginError('登录已过期，请重新登录')
+    }
+    
+    // 添加事件监听
+    window.addEventListener('auth:unauthorized', handleUnauthorized)
+    
+    // 清理函数
+    return () => {
+      window.removeEventListener('auth:unauthorized', handleUnauthorized)
+    }
   }, [])
 
   const login = async (credentials: LoginRequest) => {

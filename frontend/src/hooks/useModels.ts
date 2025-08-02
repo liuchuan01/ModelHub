@@ -40,24 +40,32 @@ export const useModelVariants = (id: number) => {
 
 // 用户收藏列表Hook
 export const useFavorites = (query: ModelListQuery = {}) => {
-  return useQuery(
+  return useQuery<any, Error>(
     ['favorites', query],
     () => modelService.getFavorites(query),
     {
       keepPreviousData: true,
       staleTime: 2 * 60 * 1000, // 2分钟
+      retry: 1, // 只重试一次
+      onError: (error) => {
+        console.error('获取收藏列表失败:', error)
+      }
     }
   )
 }
 
 // 用户购买记录Hook
 export const usePurchased = (query: ModelListQuery = {}) => {
-  return useQuery(
+  return useQuery<any, Error>(
     ['purchased', query],
     () => modelService.getPurchased(query),
     {
       keepPreviousData: true,
       staleTime: 2 * 60 * 1000,
+      retry: 1, // 只重试一次
+      onError: (error) => {
+        console.error('获取购买记录失败:', error)
+      }
     }
   )
 }
@@ -97,19 +105,31 @@ export const useModelActions = () => {
     ({ modelId, notes }: { modelId: number; notes?: string }) =>
       modelService.favoriteModel(modelId, notes),
     {
-      onSuccess: () => {
+      onSuccess: (_, variables) => {
+        // 立即刷新所有相关查询
         queryClient.invalidateQueries('favorites')
         queryClient.invalidateQueries('models')
+        queryClient.invalidateQueries(['model', variables.modelId])
+        console.log('收藏操作成功，已刷新数据')
       },
+      onError: (error) => {
+        console.error('收藏操作失败:', error)
+      }
     }
   )
 
   // 取消收藏
   const unfavoriteModelMutation = useMutation(modelService.unfavoriteModel, {
-    onSuccess: () => {
+    onSuccess: (_, modelId) => {
+      // 立即刷新所有相关查询
       queryClient.invalidateQueries('favorites')
       queryClient.invalidateQueries('models')
+      queryClient.invalidateQueries(['model', modelId])
+      console.log('取消收藏操作成功，已刷新数据')
     },
+    onError: (error) => {
+      console.error('取消收藏操作失败:', error)
+    }
   })
 
   // 标记为已购买
@@ -126,10 +146,16 @@ export const useModelActions = () => {
       }
     }) => modelService.markAsPurchased(modelId, purchaseData),
     {
-      onSuccess: () => {
+      onSuccess: (_, variables) => {
+        // 立即刷新所有相关查询
         queryClient.invalidateQueries('purchased')
         queryClient.invalidateQueries('models')
+        queryClient.invalidateQueries(['model', variables.modelId])
+        console.log('购买标记操作成功，已刷新数据')
       },
+      onError: (error) => {
+        console.error('购买标记操作失败:', error)
+      }
     }
   )
 
@@ -137,10 +163,16 @@ export const useModelActions = () => {
   const unmarkAsPurchasedMutation = useMutation(
     modelService.unmarkAsPurchased,
     {
-      onSuccess: () => {
+      onSuccess: (_, modelId) => {
+        // 立即刷新所有相关查询
         queryClient.invalidateQueries('purchased')
         queryClient.invalidateQueries('models')
+        queryClient.invalidateQueries(['model', modelId])
+        console.log('取消购买标记操作成功，已刷新数据')
       },
+      onError: (error) => {
+        console.error('取消购买标记操作失败:', error)
+      }
     }
   )
 
