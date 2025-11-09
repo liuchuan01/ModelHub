@@ -5,11 +5,18 @@ use crate::domain::models::model_dto::*;
 use crate::infrastructure::repositories::model_repository::ModelRepositoryTrait;
 use sea_orm::ActiveValue::Set;
 
-pub struct ModelService<T: ModelRepositoryTrait> {
+#[derive(Clone)]
+pub struct ModelService<T>
+where
+    T: ModelRepositoryTrait + Clone,
+{
     model_repository: T,
 }
 
-impl<T: ModelRepositoryTrait> ModelService<T> {
+impl<T> ModelService<T>
+where
+    T: ModelRepositoryTrait + Clone,
+{
     pub fn new(model_repository: T) -> Self {
         Self { model_repository }
     }
@@ -72,7 +79,7 @@ impl<T: ModelRepositoryTrait> ModelService<T> {
         let model_data = model::ActiveModel {
             name: Set(request.name),
             series: Set(request.series),
-            grade: Set(request.grade),
+            category: Set(request.category),
             release_date: Set(request.release_date),
             status: Set(request.status),
             manufacturer_id: Set(request.manufacturer_id),
@@ -102,7 +109,7 @@ impl<T: ModelRepositoryTrait> ModelService<T> {
             id: Set(existing_model.id),
             name: Set(request.name.unwrap_or(existing_model.name)),
             series: Set(request.series.or(existing_model.series)),
-            grade: Set(request.grade.or(existing_model.grade)),
+            category: Set(request.category.or(existing_model.category)),
             release_date: Set(request.release_date.or(existing_model.release_date)),
             status: Set(request.status.unwrap_or(existing_model.status)),
             manufacturer_id: Set(request
@@ -204,7 +211,7 @@ impl<T: ModelRepositoryTrait> ModelService<T> {
             id: model.id,
             name: model.name,
             series: model.series,
-            grade: model.grade,
+            category: model.category,
             release_date: model.release_date,
             status: model.status,
             manufacturer_id: model.manufacturer_id,

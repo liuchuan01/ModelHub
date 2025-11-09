@@ -21,6 +21,7 @@ pub trait ManufacturerRepositoryTrait: Send + Sync {
     async fn delete(&self, id: i32) -> Result<DeleteResult, DbErr>;
 }
 
+#[derive(Clone)]
 pub struct ManufacturerRepository {
     db: DatabaseConnection,
 }

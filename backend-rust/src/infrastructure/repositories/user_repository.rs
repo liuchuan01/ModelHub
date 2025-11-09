@@ -4,15 +4,16 @@ use crate::domain::entities::user;
 use async_trait::async_trait;
 use sea_orm::*;
 
+#[derive(Clone)]
+pub struct UserRepository {
+    db: DatabaseConnection,
+}
+
 #[async_trait]
 pub trait UserRepositoryTrait: Send + Sync {
     async fn find_by_username(&self, username: &str) -> Result<Option<user::Model>, DbErr>;
     async fn find_by_id(&self, id: i32) -> Result<Option<user::Model>, DbErr>;
     async fn create(&self, user_data: user::ActiveModel) -> Result<user::Model, DbErr>;
-}
-
-pub struct UserRepository {
-    db: DatabaseConnection,
 }
 
 impl UserRepository {

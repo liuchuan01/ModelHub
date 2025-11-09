@@ -8,7 +8,7 @@ pub struct CreateModelRequest {
     #[validate(length(max = 100))]
     pub series: Option<String>,
     #[validate(length(max = 50))]
-    pub grade: Option<String>,
+    pub category: Option<String>,
     pub rating: Option<f32>,
     pub release_date: Option<chrono::NaiveDate>,
     pub status: String,
@@ -24,7 +24,7 @@ pub struct UpdateModelRequest {
     #[validate(length(max = 100))]
     pub series: Option<String>,
     #[validate(length(max = 50))]
-    pub grade: Option<String>,
+    pub category: Option<String>,
     pub rating: Option<f32>,
     pub release_date: Option<chrono::NaiveDate>,
     pub status: Option<String>,
@@ -38,7 +38,7 @@ pub struct ModelResponse {
     pub id: i32,
     pub name: String,
     pub series: Option<String>,
-    pub grade: Option<String>,
+    pub category: Option<String>,
     pub release_date: Option<chrono::NaiveDate>,
     pub status: String,
     pub manufacturer_id: i32,

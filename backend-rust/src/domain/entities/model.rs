@@ -13,7 +13,7 @@ pub struct Model {
     #[validate(length(max = 100))]
     pub series: Option<String>,
     #[validate(length(max = 50))]
-    pub grade: Option<String>,
+    pub category: Option<String>,
     pub release_date: Option<chrono::NaiveDate>,
     pub status: String,
     pub manufacturer_id: i32,

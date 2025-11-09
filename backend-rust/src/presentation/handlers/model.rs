@@ -1,8 +1,7 @@
 #![allow(dead_code)]
 
 use crate::domain::models::model_dto::*;
-use crate::infrastructure::repositories::model_repository::ModelRepositoryTrait;
-use crate::services::model_service::ModelService;
+use crate::presentation::state::AppState;
 use axum::{
     extract::{Path, Query, State},
     http::StatusCode,
@@ -15,7 +14,7 @@ use validator::Validate;
 pub struct PaginationParams {
     #[serde(default = "default_page")]
     pub page: u64,
-    #[serde(default = "default_per_page")]
+    #[serde(default = "default_per_page", alias = "page_size")]
     pub per_page: u64,
 }
 
@@ -26,14 +25,14 @@ fn default_per_page() -> u64 {
     20
 }
 
-pub async fn get_models<T: ModelRepositoryTrait>(
-    State(model_service): State<ModelService<T>>,
+pub async fn get_models(
+    State(state): State<AppState>,
     Query(params): Query<PaginationParams>,
 ) -> Result<Json<ModelListResponse>, StatusCode> {
-    // TODO: Get user_id from JWT claims
     let user_id = None;
 
-    match model_service
+    match state
+        .model_service
         .get_models(user_id, params.page, params.per_page)
         .await
     {
@@ -45,14 +44,13 @@ pub async fn get_models<T: ModelRepositoryTrait>(
     }
 }
 
-pub async fn get_model_by_id<T: ModelRepositoryTrait>(
-    State(model_service): State<ModelService<T>>,
+pub async fn get_model_by_id(
+    State(state): State<AppState>,
     Path(id): Path<i32>,
 ) -> Result<Json<Option<ModelResponse>>, StatusCode> {
-    // TODO: Get user_id from JWT claims
     let user_id = None;
 
-    match model_service.get_model_by_id(id, user_id).await {
+    match state.model_service.get_model_by_id(id, user_id).await {
         Ok(response) => Ok(Json(response)),
         Err(e) => {
             tracing::error!("获取模型详情失败: {:?}", e);
@@ -61,14 +59,17 @@ pub async fn get_model_by_id<T: ModelRepositoryTrait>(
     }
 }
 
-pub async fn get_model_variants<T: ModelRepositoryTrait>(
-    State(model_service): State<ModelService<T>>,
+pub async fn get_model_variants(
+    State(state): State<AppState>,
     Path(parent_id): Path<i32>,
 ) -> Result<Json<Vec<ModelResponse>>, StatusCode> {
-    // TODO: Get user_id from JWT claims
     let user_id = None;
 
-    match model_service.get_model_variants(parent_id, user_id).await {
+    match state
+        .model_service
+        .get_model_variants(parent_id, user_id)
+        .await
+    {
         Ok(response) => Ok(Json(response)),
         Err(e) => {
             tracing::error!("获取模型变体失败: {:?}", e);
@@ -77,8 +78,8 @@ pub async fn get_model_variants<T: ModelRepositoryTrait>(
     }
 }
 
-pub async fn create_model<T: ModelRepositoryTrait>(
-    State(model_service): State<ModelService<T>>,
+pub async fn create_model(
+    State(state): State<AppState>,
     Json(request): Json<CreateModelRequest>,
 ) -> Result<Json<ModelResponse>, StatusCode> {
     if let Err(e) = request.validate() {
@@ -86,7 +87,7 @@ pub async fn create_model<T: ModelRepositoryTrait>(
         return Err(StatusCode::BAD_REQUEST);
     }
 
-    match model_service.create_model(request).await {
+    match state.model_service.create_model(request).await {
         Ok(response) => Ok(Json(response)),
         Err(e) => {
             tracing::error!("创建模型失败: {:?}", e);
@@ -95,8 +96,8 @@ pub async fn create_model<T: ModelRepositoryTrait>(
     }
 }
 
-pub async fn update_model<T: ModelRepositoryTrait>(
-    State(model_service): State<ModelService<T>>,
+pub async fn update_model(
+    State(state): State<AppState>,
     Path(id): Path<i32>,
     Json(request): Json<UpdateModelRequest>,
 ) -> Result<Json<ModelResponse>, StatusCode> {
@@ -105,7 +106,7 @@ pub async fn update_model<T: ModelRepositoryTrait>(
         return Err(StatusCode::BAD_REQUEST);
     }
 
-    match model_service.update_model(id, request).await {
+    match state.model_service.update_model(id, request).await {
         Ok(response) => Ok(Json(response)),
         Err(e) => {
             tracing::error!("更新模型失败: {:?}", e);
@@ -114,11 +115,11 @@ pub async fn update_model<T: ModelRepositoryTrait>(
     }
 }
 
-pub async fn delete_model<T: ModelRepositoryTrait>(
-    State(model_service): State<ModelService<T>>,
+pub async fn delete_model(
+    State(state): State<AppState>,
     Path(id): Path<i32>,
 ) -> Result<StatusCode, StatusCode> {
-    match model_service.delete_model(id).await {
+    match state.model_service.delete_model(id).await {
         Ok(_) => Ok(StatusCode::NO_CONTENT),
         Err(e) => {
             tracing::error!("删除模型失败: {:?}", e);
@@ -127,48 +128,96 @@ pub async fn delete_model<T: ModelRepositoryTrait>(
     }
 }
 
-pub async fn toggle_favorite<T: ModelRepositoryTrait>(
-    State(model_service): State<ModelService<T>>,
+pub async fn favorite_model(
+    State(state): State<AppState>,
     Path(id): Path<i32>,
     Json(request): Json<ToggleFavoriteRequest>,
 ) -> Result<StatusCode, StatusCode> {
-    // TODO: Get user_id from JWT claims
-    let user_id = 1; // 临时硬编码
+    let user_id = 1; // TODO: 从JWT中获取
 
-    match model_service.toggle_favorite(user_id, id, request).await {
+    match state
+        .model_service
+        .toggle_favorite(user_id, id, request)
+        .await
+    {
         Ok(_) => Ok(StatusCode::NO_CONTENT),
         Err(e) => {
-            tracing::error!("切换收藏状态失败: {:?}", e);
+            tracing::error!("收藏模型失败: {:?}", e);
             Err(StatusCode::INTERNAL_SERVER_ERROR)
         }
     }
 }
 
-pub async fn toggle_purchase<T: ModelRepositoryTrait>(
-    State(model_service): State<ModelService<T>>,
+pub async fn unfavorite_model(
+    State(state): State<AppState>,
+    Path(id): Path<i32>,
+) -> Result<StatusCode, StatusCode> {
+    let user_id = 1; // TODO: 从JWT中获取
+
+    let request = ToggleFavoriteRequest { notes: None };
+
+    match state
+        .model_service
+        .toggle_favorite(user_id, id, request)
+        .await
+    {
+        Ok(_) => Ok(StatusCode::NO_CONTENT),
+        Err(e) => {
+            tracing::error!("取消收藏失败: {:?}", e);
+            Err(StatusCode::INTERNAL_SERVER_ERROR)
+        }
+    }
+}
+
+pub async fn mark_purchase(
+    State(state): State<AppState>,
     Path(id): Path<i32>,
     Json(request): Json<TogglePurchaseRequest>,
 ) -> Result<StatusCode, StatusCode> {
-    // TODO: Get user_id from JWT claims
-    let user_id = 1; // 临时硬编码
+    let user_id = 1; // TODO: 从JWT中获取
 
-    match model_service.toggle_purchase(user_id, id, request).await {
+    match state
+        .model_service
+        .toggle_purchase(user_id, id, request)
+        .await
+    {
         Ok(_) => Ok(StatusCode::NO_CONTENT),
         Err(e) => {
-            tracing::error!("切换购买状态失败: {:?}", e);
+            tracing::error!("标记购买失败: {:?}", e);
             Err(StatusCode::INTERNAL_SERVER_ERROR)
         }
     }
 }
 
-pub async fn get_favorites<T: ModelRepositoryTrait>(
-    State(model_service): State<ModelService<T>>,
+pub async fn unmark_purchase(
+    State(state): State<AppState>,
+    Path(id): Path<i32>,
+) -> Result<StatusCode, StatusCode> {
+    let user_id = 1; // TODO: 从JWT中获取
+
+    let request = TogglePurchaseRequest { notes: None };
+
+    match state
+        .model_service
+        .toggle_purchase(user_id, id, request)
+        .await
+    {
+        Ok(_) => Ok(StatusCode::NO_CONTENT),
+        Err(e) => {
+            tracing::error!("取消购买失败: {:?}", e);
+            Err(StatusCode::INTERNAL_SERVER_ERROR)
+        }
+    }
+}
+
+pub async fn get_favorites(
+    State(state): State<AppState>,
     Query(params): Query<PaginationParams>,
 ) -> Result<Json<ModelListResponse>, StatusCode> {
-    // TODO: Get user_id from JWT claims
-    let user_id = 1; // 临时硬编码
+    let user_id = 1; // TODO: 从JWT中获取
 
-    match model_service
+    match state
+        .model_service
         .get_favorites(user_id, params.page, params.per_page)
         .await
     {
@@ -180,14 +229,14 @@ pub async fn get_favorites<T: ModelRepositoryTrait>(
     }
 }
 
-pub async fn get_purchases<T: ModelRepositoryTrait>(
-    State(model_service): State<ModelService<T>>,
+pub async fn get_purchases(
+    State(state): State<AppState>,
     Query(params): Query<PaginationParams>,
 ) -> Result<Json<ModelListResponse>, StatusCode> {
-    // TODO: Get user_id from JWT claims
-    let user_id = 1; // 临时硬编码
+    let user_id = 1; // TODO: 从JWT中获取
 
-    match model_service
+    match state
+        .model_service
         .get_purchases(user_id, params.page, params.per_page)
         .await
     {

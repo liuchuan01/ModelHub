@@ -5,11 +5,18 @@ use crate::domain::models::manufacturer_dto::*;
 use crate::infrastructure::repositories::manufacturer_repository::ManufacturerRepositoryTrait;
 use sea_orm::ActiveValue::Set;
 
-pub struct ManufacturerService<T: ManufacturerRepositoryTrait> {
+#[derive(Clone)]
+pub struct ManufacturerService<T>
+where
+    T: ManufacturerRepositoryTrait + Clone,
+{
     manufacturer_repository: T,
 }
 
-impl<T: ManufacturerRepositoryTrait> ManufacturerService<T> {
+impl<T> ManufacturerService<T>
+where
+    T: ManufacturerRepositoryTrait + Clone,
+{
     pub fn new(manufacturer_repository: T) -> Self {
         Self {
             manufacturer_repository,

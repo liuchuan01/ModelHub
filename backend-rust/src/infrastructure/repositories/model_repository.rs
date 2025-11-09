@@ -55,6 +55,7 @@ pub trait ModelRepositoryTrait: Send + Sync {
     ) -> Result<(Vec<model::Model>, u64), DbErr>;
 }
 
+#[derive(Clone)]
 pub struct ModelRepository {
     db: DatabaseConnection,
 }

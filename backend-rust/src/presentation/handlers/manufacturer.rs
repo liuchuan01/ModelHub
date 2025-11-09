@@ -1,8 +1,7 @@
 #![allow(dead_code)]
 
 use crate::domain::models::manufacturer_dto::*;
-use crate::infrastructure::repositories::manufacturer_repository::ManufacturerRepositoryTrait;
-use crate::services::manufacturer_service::ManufacturerService;
+use crate::presentation::state::AppState;
 use axum::{
     extract::{Path, State},
     http::StatusCode,
@@ -10,10 +9,10 @@ use axum::{
 };
 use validator::Validate;
 
-pub async fn get_manufacturers<T: ManufacturerRepositoryTrait>(
-    State(manufacturer_service): State<ManufacturerService<T>>,
+pub async fn get_manufacturers(
+    State(state): State<AppState>,
 ) -> Result<Json<Vec<ManufacturerResponse>>, StatusCode> {
-    match manufacturer_service.get_manufacturers().await {
+    match state.manufacturer_service.get_manufacturers().await {
         Ok(response) => Ok(Json(response)),
         Err(e) => {
             tracing::error!("获取厂商列表失败: {:?}", e);
@@ -22,11 +21,11 @@ pub async fn get_manufacturers<T: ManufacturerRepositoryTrait>(
     }
 }
 
-pub async fn get_manufacturer_by_id<T: ManufacturerRepositoryTrait>(
-    State(manufacturer_service): State<ManufacturerService<T>>,
+pub async fn get_manufacturer_by_id(
+    State(state): State<AppState>,
     Path(id): Path<i32>,
 ) -> Result<Json<Option<ManufacturerResponse>>, StatusCode> {
-    match manufacturer_service.get_manufacturer_by_id(id).await {
+    match state.manufacturer_service.get_manufacturer_by_id(id).await {
         Ok(response) => Ok(Json(response)),
         Err(e) => {
             tracing::error!("获取厂商详情失败: {:?}", e);
@@ -35,8 +34,8 @@ pub async fn get_manufacturer_by_id<T: ManufacturerRepositoryTrait>(
     }
 }
 
-pub async fn create_manufacturer<T: ManufacturerRepositoryTrait>(
-    State(manufacturer_service): State<ManufacturerService<T>>,
+pub async fn create_manufacturer(
+    State(state): State<AppState>,
     Json(request): Json<CreateManufacturerRequest>,
 ) -> Result<Json<ManufacturerResponse>, StatusCode> {
     if let Err(e) = request.validate() {
@@ -44,7 +43,11 @@ pub async fn create_manufacturer<T: ManufacturerRepositoryTrait>(
         return Err(StatusCode::BAD_REQUEST);
     }
 
-    match manufacturer_service.create_manufacturer(request).await {
+    match state
+        .manufacturer_service
+        .create_manufacturer(request)
+        .await
+    {
         Ok(response) => Ok(Json(response)),
         Err(e) => {
             tracing::error!("创建厂商失败: {:?}", e);
@@ -53,8 +56,8 @@ pub async fn create_manufacturer<T: ManufacturerRepositoryTrait>(
     }
 }
 
-pub async fn update_manufacturer<T: ManufacturerRepositoryTrait>(
-    State(manufacturer_service): State<ManufacturerService<T>>,
+pub async fn update_manufacturer(
+    State(state): State<AppState>,
     Path(id): Path<i32>,
     Json(request): Json<UpdateManufacturerRequest>,
 ) -> Result<Json<ManufacturerResponse>, StatusCode> {
@@ -63,7 +66,11 @@ pub async fn update_manufacturer<T: ManufacturerRepositoryTrait>(
         return Err(StatusCode::BAD_REQUEST);
     }
 
-    match manufacturer_service.update_manufacturer(id, request).await {
+    match state
+        .manufacturer_service
+        .update_manufacturer(id, request)
+        .await
+    {
         Ok(response) => Ok(Json(response)),
         Err(e) => {
             tracing::error!("更新厂商失败: {:?}", e);
@@ -72,11 +79,11 @@ pub async fn update_manufacturer<T: ManufacturerRepositoryTrait>(
     }
 }
 
-pub async fn delete_manufacturer<T: ManufacturerRepositoryTrait>(
-    State(manufacturer_service): State<ManufacturerService<T>>,
+pub async fn delete_manufacturer(
+    State(state): State<AppState>,
     Path(id): Path<i32>,
 ) -> Result<StatusCode, StatusCode> {
-    match manufacturer_service.delete_manufacturer(id).await {
+    match state.manufacturer_service.delete_manufacturer(id).await {
         Ok(_) => Ok(StatusCode::NO_CONTENT),
         Err(e) => {
             tracing::error!("删除厂商失败: {:?}", e);

@@ -21,7 +21,7 @@ async fn main() -> anyhow::Result<()> {
     tracing::info!("配置加载成功: {:?}", config);
 
     // 创建路由
-    let app = presentation::routes::create_routes(config.clone());
+    let app = presentation::routes::create_routes(config.clone()).await?;
 
     // 启动服务器
     let bind_addr = (config.server.host.as_str(), config.server.port);
