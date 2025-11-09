@@ -1,6 +1,8 @@
+#![allow(dead_code)]
+
+use crate::domain::entities::user;
 use async_trait::async_trait;
 use sea_orm::*;
-use crate::domain::entities::user;
 
 #[async_trait]
 pub trait UserRepositoryTrait: Send + Sync {

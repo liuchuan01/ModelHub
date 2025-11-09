@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::domain::entities::model;
 use crate::domain::models::model_dto::*;
 use crate::infrastructure::repositories::model_repository::ModelRepositoryTrait;

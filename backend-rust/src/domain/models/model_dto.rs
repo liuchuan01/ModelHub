@@ -48,6 +48,7 @@ pub struct ModelResponse {
     pub updated_at: chrono::NaiveDateTime,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct PriceHistoryResponse {
     pub id: i32,

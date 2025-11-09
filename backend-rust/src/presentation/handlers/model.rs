@@ -1,12 +1,14 @@
+#![allow(dead_code)]
+
 use crate::domain::models::model_dto::*;
 use crate::infrastructure::repositories::model_repository::ModelRepositoryTrait;
-use crate::services::ModelService;
+use crate::services::model_service::ModelService;
 use axum::{
     extract::{Path, Query, State},
     http::StatusCode,
     response::Json,
 };
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use validator::Validate;
 
 #[derive(Debug, Deserialize)]

@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::domain::entities::manufacturer;
 use crate::domain::models::manufacturer_dto::*;
 use crate::infrastructure::repositories::manufacturer_repository::ManufacturerRepositoryTrait;

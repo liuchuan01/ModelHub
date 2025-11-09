@@ -1,15 +1,15 @@
+#![allow(dead_code)]
+
+use crate::config::auth;
+
 use axum::{
-    extract::{Request, State},
+    extract::Request,
     http::{header, StatusCode},
     middleware::Next,
     response::Response,
 };
-use crate::config::auth;
 
-pub async fn auth_middleware(
-    request: Request,
-    next: Next,
-) -> Result<Response, StatusCode> {
+pub async fn auth_middleware(request: Request, next: Next) -> Result<Response, StatusCode> {
     let auth_header = request
         .headers()
         .get(header::AUTHORIZATION)

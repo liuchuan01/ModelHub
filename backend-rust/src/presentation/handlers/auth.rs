@@ -1,6 +1,8 @@
+#![allow(dead_code)]
+
 use crate::domain::models::auth::{LoginRequest, LoginResponse};
 use crate::infrastructure::repositories::user_repository::UserRepositoryTrait;
-use crate::services::AuthService;
+use crate::services::auth_service::AuthService;
 use axum::{extract::State, http::StatusCode, response::Json};
 use serde_json::{json, Value};
 use validator::Validate;

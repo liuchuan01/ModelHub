@@ -1,6 +1,7 @@
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use std::time::Duration;
 
+#[allow(dead_code)]
 pub async fn create_connection(
     database_url: &str,
     max_connections: u32,

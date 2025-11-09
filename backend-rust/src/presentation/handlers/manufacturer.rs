@@ -1,6 +1,8 @@
+#![allow(dead_code)]
+
 use crate::domain::models::manufacturer_dto::*;
 use crate::infrastructure::repositories::manufacturer_repository::ManufacturerRepositoryTrait;
-use crate::services::ManufacturerService;
+use crate::services::manufacturer_service::ManufacturerService;
 use axum::{
     extract::{Path, State},
     http::StatusCode,

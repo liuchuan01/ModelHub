@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::domain::entities::{model, user_model_favorite, user_model_purchase};
 use async_trait::async_trait;
 use sea_orm::ActiveValue::Set;

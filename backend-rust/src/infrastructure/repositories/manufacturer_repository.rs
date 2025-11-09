@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::domain::entities::manufacturer;
 use async_trait::async_trait;
 use sea_orm::*;
@@ -59,8 +61,9 @@ impl ManufacturerRepositoryTrait for ManufacturerRepository {
     async fn update(
         &self,
         id: i32,
-        manufacturer_data: manufacturer::ActiveModel,
+        mut manufacturer_data: manufacturer::ActiveModel,
     ) -> Result<manufacturer::Model, DbErr> {
+        manufacturer_data.id = Set(id);
         manufacturer_data.update(&self.db).await
     }
 
