@@ -61,4 +61,8 @@ impl<T: UserRepositoryTrait + Clone> AuthService<T> {
         let hashed = hash(password, DEFAULT_COST)?;
         Ok(hashed)
     }
+
+    pub fn verify_token(&self, token: &str) -> anyhow::Result<auth::Claims> {
+        auth::verify_jwt(token, &self.jwt_secret)
+    }
 }

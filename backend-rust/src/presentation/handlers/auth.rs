@@ -1,8 +1,10 @@
 #![allow(dead_code)]
 
+use super::user_id_from_claims;
+use crate::config::auth::Claims;
 use crate::domain::models::auth::{LoginRequest, LoginResponse};
 use crate::presentation::state::AppState;
-use axum::{extract::State, http::StatusCode, response::Json};
+use axum::{extract::State, http::StatusCode, response::Json, Extension};
 use serde_json::{json, Value};
 use validator::Validate;
 
@@ -31,9 +33,11 @@ pub async fn health() -> Result<Json<Value>, StatusCode> {
     })))
 }
 
-pub async fn get_profile(State(state): State<AppState>) -> Result<Json<Value>, StatusCode> {
-    // TODO: Get user_id from JWT claims
-    let user_id = 1; // 临时硬编码
+pub async fn get_profile(
+    State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,
+) -> Result<Json<Value>, StatusCode> {
+    let user_id = user_id_from_claims(&claims)?;
 
     match state.auth_service.get_user_by_id(user_id).await {
         Ok(Some(user)) => Ok(Json(json!({

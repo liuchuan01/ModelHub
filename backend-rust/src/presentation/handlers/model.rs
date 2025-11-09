@@ -1,11 +1,14 @@
 #![allow(dead_code)]
 
+use super::user_id_from_claims;
+use crate::config::auth::Claims;
 use crate::domain::models::model_dto::*;
 use crate::presentation::state::AppState;
 use axum::{
     extract::{Path, Query, State},
     http::StatusCode,
     response::Json,
+    Extension,
 };
 use serde::Deserialize;
 use validator::Validate;
@@ -130,10 +133,11 @@ pub async fn delete_model(
 
 pub async fn favorite_model(
     State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,
     Path(id): Path<i32>,
     Json(request): Json<ToggleFavoriteRequest>,
 ) -> Result<StatusCode, StatusCode> {
-    let user_id = 1; // TODO: 从JWT中获取
+    let user_id = user_id_from_claims(&claims)?;
 
     match state
         .model_service
@@ -150,9 +154,10 @@ pub async fn favorite_model(
 
 pub async fn unfavorite_model(
     State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,
     Path(id): Path<i32>,
 ) -> Result<StatusCode, StatusCode> {
-    let user_id = 1; // TODO: 从JWT中获取
+    let user_id = user_id_from_claims(&claims)?;
 
     let request = ToggleFavoriteRequest { notes: None };
 
@@ -171,10 +176,11 @@ pub async fn unfavorite_model(
 
 pub async fn mark_purchase(
     State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,
     Path(id): Path<i32>,
     Json(request): Json<TogglePurchaseRequest>,
 ) -> Result<StatusCode, StatusCode> {
-    let user_id = 1; // TODO: 从JWT中获取
+    let user_id = user_id_from_claims(&claims)?;
 
     match state
         .model_service
@@ -191,9 +197,10 @@ pub async fn mark_purchase(
 
 pub async fn unmark_purchase(
     State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,
     Path(id): Path<i32>,
 ) -> Result<StatusCode, StatusCode> {
-    let user_id = 1; // TODO: 从JWT中获取
+    let user_id = user_id_from_claims(&claims)?;
 
     let request = TogglePurchaseRequest { notes: None };
 
@@ -212,9 +219,10 @@ pub async fn unmark_purchase(
 
 pub async fn get_favorites(
     State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,
     Query(params): Query<PaginationParams>,
 ) -> Result<Json<ModelListResponse>, StatusCode> {
-    let user_id = 1; // TODO: 从JWT中获取
+    let user_id = user_id_from_claims(&claims)?;
 
     match state
         .model_service
@@ -231,9 +239,10 @@ pub async fn get_favorites(
 
 pub async fn get_purchases(
     State(state): State<AppState>,
+    Extension(claims): Extension<Claims>,
     Query(params): Query<PaginationParams>,
 ) -> Result<Json<ModelListResponse>, StatusCode> {
-    let user_id = 1; // TODO: 从JWT中获取
+    let user_id = user_id_from_claims(&claims)?;
 
     match state
         .model_service
