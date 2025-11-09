@@ -9,6 +9,7 @@ import ExplorePage from './pages/ExplorePage'
 import ModelDetailPage from './pages/ModelDetailPage'
 import FavoritesPage from './pages/FavoritesPage'
 import PurchasedPage from './pages/PurchasedPage'
+import AddModelPage from './pages/AddModelPage'
 
 const AppContainer = styled.div`
   display: flex;
@@ -46,6 +47,7 @@ const AuthenticatedApp: React.FC = () => {
           <Route path="/model/:id" element={<ModelDetailPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/purchased" element={<PurchasedPage />} />
+          <Route path="/add-model" element={<AddModelPage />} />
         </Routes>
       </MainContent>
     </AppContainer>
@@ -88,4 +90,4 @@ function App() {
   }
 }
 
-export default App 
+export default App

@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import Masonry from 'react-masonry-css'
-import { Search, Filter, Grid, List } from 'lucide-react'
+import { Search, Filter, Grid, List, Plus } from 'lucide-react'
 import { useModels } from '../hooks/useModels'
 import ModelCard from '../components/ModelCard'
 import type { ModelListQuery } from '../types'
@@ -132,6 +132,29 @@ const ViewButton = styled.button<{ $active?: boolean }>`
   }
 `
 
+const AddModelButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--color-blue-500);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  
+  &:hover {
+    background: var(--color-blue-600);
+  }
+  
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+`
+
 const MasonryContainer = styled(Masonry)`
   display: flex;
   margin-left: -16px;
@@ -198,6 +221,10 @@ const ExplorePage: React.FC = () => {
 
   const handleModelClick = (modelId: number) => {
     navigate(`/model/${modelId}`)
+  }
+
+  const handleAddModelClick = () => {
+    navigate('/add-model')
   }
 
   const breakpointColumnsObj = {
@@ -286,6 +313,10 @@ const ExplorePage: React.FC = () => {
           找到 {data?.total || 0} 个模型
         </div>
         <div className="view-controls">
+          <AddModelButton onClick={handleAddModelClick}>
+            <Plus size={16} />
+            添加模型
+          </AddModelButton>
           <ViewButton
             $active={viewMode === 'masonry'}
             onClick={() => setViewMode('masonry')}

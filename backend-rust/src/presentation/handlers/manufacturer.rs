@@ -1,0 +1,84 @@
+use crate::domain::models::manufacturer_dto::*;
+use crate::infrastructure::repositories::manufacturer_repository::ManufacturerRepositoryTrait;
+use crate::services::ManufacturerService;
+use axum::{
+    extract::{Path, State},
+    http::StatusCode,
+    response::Json,
+};
+use validator::Validate;
+
+pub async fn get_manufacturers<T: ManufacturerRepositoryTrait>(
+    State(manufacturer_service): State<ManufacturerService<T>>,
+) -> Result<Json<Vec<ManufacturerResponse>>, StatusCode> {
+    match manufacturer_service.get_manufacturers().await {
+        Ok(response) => Ok(Json(response)),
+        Err(e) => {
+            tracing::error!("获取厂商列表失败: {:?}", e);
+            Err(StatusCode::INTERNAL_SERVER_ERROR)
+        }
+    }
+}
+
+pub async fn get_manufacturer_by_id<T: ManufacturerRepositoryTrait>(
+    State(manufacturer_service): State<ManufacturerService<T>>,
+    Path(id): Path<i32>,
+) -> Result<Json<Option<ManufacturerResponse>>, StatusCode> {
+    match manufacturer_service.get_manufacturer_by_id(id).await {
+        Ok(response) => Ok(Json(response)),
+        Err(e) => {
+            tracing::error!("获取厂商详情失败: {:?}", e);
+            Err(StatusCode::INTERNAL_SERVER_ERROR)
+        }
+    }
+}
+
+pub async fn create_manufacturer<T: ManufacturerRepositoryTrait>(
+    State(manufacturer_service): State<ManufacturerService<T>>,
+    Json(request): Json<CreateManufacturerRequest>,
+) -> Result<Json<ManufacturerResponse>, StatusCode> {
+    if let Err(e) = request.validate() {
+        tracing::error!("验证错误: {:?}", e);
+        return Err(StatusCode::BAD_REQUEST);
+    }
+
+    match manufacturer_service.create_manufacturer(request).await {
+        Ok(response) => Ok(Json(response)),
+        Err(e) => {
+            tracing::error!("创建厂商失败: {:?}", e);
+            Err(StatusCode::INTERNAL_SERVER_ERROR)
+        }
+    }
+}
+
+pub async fn update_manufacturer<T: ManufacturerRepositoryTrait>(
+    State(manufacturer_service): State<ManufacturerService<T>>,
+    Path(id): Path<i32>,
+    Json(request): Json<UpdateManufacturerRequest>,
+) -> Result<Json<ManufacturerResponse>, StatusCode> {
+    if let Err(e) = request.validate() {
+        tracing::error!("验证错误: {:?}", e);
+        return Err(StatusCode::BAD_REQUEST);
+    }
+
+    match manufacturer_service.update_manufacturer(id, request).await {
+        Ok(response) => Ok(Json(response)),
+        Err(e) => {
+            tracing::error!("更新厂商失败: {:?}", e);
+            Err(StatusCode::INTERNAL_SERVER_ERROR)
+        }
+    }
+}
+
+pub async fn delete_manufacturer<T: ManufacturerRepositoryTrait>(
+    State(manufacturer_service): State<ManufacturerService<T>>,
+    Path(id): Path<i32>,
+) -> Result<StatusCode, StatusCode> {
+    match manufacturer_service.delete_manufacturer(id).await {
+        Ok(_) => Ok(StatusCode::NO_CONTENT),
+        Err(e) => {
+            tracing::error!("删除厂商失败: {:?}", e);
+            Err(StatusCode::INTERNAL_SERVER_ERROR)
+        }
+    }
+}

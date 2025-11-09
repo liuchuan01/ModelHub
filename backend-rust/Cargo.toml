@@ -1,0 +1,48 @@
+[package]
+name = "backend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Web框架
+tokio = { version = "1.0", features = ["full"] }
+axum = "0.7"
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "trace"] }
+
+# 序列化
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# 数据库
+sea-orm = { version = "0.12", features = ["sqlx-postgres", "runtime-tokio-rustls", "macros", "with-chrono", "with-uuid"] }
+sea-orm-migration = "0.12"
+
+# 认证
+jsonwebtoken = "9.0"
+bcrypt = "0.15"
+
+# 时间处理
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.0", features = ["v4", "serde"] }
+
+# 错误处理
+thiserror = "1.0"
+anyhow = "1.0"
+
+# 配置管理
+dotenvy = "0.15"
+
+# 日志
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# 验证
+validator = { version = "0.16", features = ["derive"] }
+
+# 异步
+async-trait = "0.1"
+
+# 工具
+regex = "1.0"
+log = "0.4"

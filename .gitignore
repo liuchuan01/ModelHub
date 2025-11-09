@@ -45,6 +45,8 @@ logs/
 /bin/
 /dist/
 /build/
+backend-go/bin/
+backend-rust/target/
 
 # Temporary files
 tmp/
@@ -77,4 +79,4 @@ frontend/.env.production.local
 
 # Frontend IDE
 frontend/.vscode/settings.json
-frontend/.idea/ 
+frontend/.idea/

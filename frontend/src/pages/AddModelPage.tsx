@@ -5,6 +5,7 @@ import { ArrowLeft, Save, X } from 'lucide-react'
 import { modelService } from '../services/modelService'
 import { manufacturerService } from '../services/manufacturerService'
 import type { Manufacturer } from '../types'
+import StarRating from '../components/StarRating'
 
 const Container = styled.div`
   padding: 24px 48px;
@@ -137,6 +138,15 @@ const ErrorMessage = styled.div`
   margin-top: 8px;
 `
 
+const RatingContainer = styled.div`
+  padding: 8px 0;
+`
+
+const AddOption = styled.option`
+  font-style: italic;
+  color: var(--color-blue-500);
+`
+
 const AddModelPage: React.FC = () => {
   const navigate = useNavigate()
   const [manufacturers, setManufacturers] = useState<Manufacturer[]>([])
@@ -149,9 +159,11 @@ const AddModelPage: React.FC = () => {
     category: 'hg',
     status: '现货',
     release_date: '',
-    rating: '',
+    rating: 0,
     notes: ''
   })
+  const [showAddManufacturerInput, setShowAddManufacturerInput] = useState(false)
+  const [newManufacturerName, setNewManufacturerName] = useState('')
 
   useEffect(() => {
     // 获取厂商列表
@@ -178,9 +190,63 @@ const AddModelPage: React.FC = () => {
     }))
   }
 
+  const handleRatingChange = (rating: number) => {
+    setFormData(prev => ({
+      ...prev,
+      rating
+    }))
+  }
+
+  const handleManufacturerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value
+    if (value === 'add-new') {
+      setShowAddManufacturerInput(true)
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        manufacturer_id: value
+      }))
+      setShowAddManufacturerInput(false)
+    }
+  }
+
+  const handleAddManufacturer = async () => {
+    if (!newManufacturerName.trim()) {
+      setError('厂商名称不能为空')
+      return
+    }
+    
+    try {
+      // 调用API创建新厂商
+      const newManufacturer = await manufacturerService.createManufacturer(newManufacturerName)
+      
+      // 更新厂商列表
+      setManufacturers(prev => [...prev, newManufacturer])
+      
+      // 设置为当前选中的厂商
+      setFormData(prev => ({
+        ...prev,
+        manufacturer_id: String(newManufacturer.id)
+      }))
+      
+      // 重置状态
+      setShowAddManufacturerInput(false)
+      setNewManufacturerName('')
+      setError(null)
+    } catch (err: any) {
+      setError('创建厂商失败: ' + (err.message || ''))
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    
+    // 如果正在添加新厂商，先完成添加
+    if (showAddManufacturerInput) {
+      await handleAddManufacturer()
+      if (error) return // 如果添加失败，停止提交
+    }
     
     try {
       // 准备提交数据
@@ -193,7 +259,7 @@ const AddModelPage: React.FC = () => {
       
       if (formData.series) modelData.series = formData.series
       if (formData.release_date) modelData.release_date = formData.release_date
-      if (formData.rating) modelData.rating = parseFloat(formData.rating)
+      if (formData.rating) modelData.rating = formData.rating
       if (formData.notes) modelData.notes = formData.notes
       
       await modelService.createModel(modelData)
@@ -227,20 +293,47 @@ const AddModelPage: React.FC = () => {
         
         <FormGroup>
           <label htmlFor="manufacturer_id">厂商 *</label>
-          <select
-            id="manufacturer_id"
-            name="manufacturer_id"
-            value={formData.manufacturer_id}
-            onChange={handleChange}
-            required
-          >
-            <option value="">请选择厂商</option>
-            {manufacturers.map(manufacturer => (
-              <option key={manufacturer.id} value={manufacturer.id}>
-                {manufacturer.name}
-              </option>
-            ))}
-          </select>
+          {showAddManufacturerInput ? (
+            <div>
+              <input
+                type="text"
+                value={newManufacturerName}
+                onChange={(e) => setNewManufacturerName(e.target.value)}
+                placeholder="输入新厂商名称"
+                autoFocus
+              />
+              <ButtonGroup style={{ marginTop: '12px', justifyContent: 'flex-start' }}>
+                <Button type="button" onClick={handleAddManufacturer} $primary>
+                  添加厂商
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={() => {
+                    setShowAddManufacturerInput(false)
+                    setNewManufacturerName('')
+                  }}
+                >
+                  取消
+                </Button>
+              </ButtonGroup>
+            </div>
+          ) : (
+            <select
+              id="manufacturer_id"
+              name="manufacturer_id"
+              value={formData.manufacturer_id}
+              onChange={handleManufacturerChange}
+              required
+            >
+              <option value="">请选择厂商</option>
+              {manufacturers.map(manufacturer => (
+                <option key={manufacturer.id} value={manufacturer.id}>
+                  {manufacturer.name}
+                </option>
+              ))}
+              <AddOption value="add-new">没有想要的厂商？添加一个吧</AddOption>
+            </select>
+          )}
         </FormGroup>
         
         <FormGroup>
@@ -310,17 +403,14 @@ const AddModelPage: React.FC = () => {
           </FormGroup>
           
           <FormGroup>
-            <label htmlFor="rating">评分 (0-5)</label>
-            <input
-              type="number"
-              id="rating"
-              name="rating"
-              min="0"
-              max="5"
-              step="0.1"
-              value={formData.rating}
-              onChange={handleChange}
-            />
+            <label htmlFor="rating">评分</label>
+            <RatingContainer>
+              <StarRating 
+                rating={formData.rating} 
+                onRatingChange={handleRatingChange}
+                editable={true}
+              />
+            </RatingContainer>
           </FormGroup>
         </FormRow>
         

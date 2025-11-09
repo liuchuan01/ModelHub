@@ -362,6 +362,14 @@ const Sidebar: React.FC = () => {
           
           <NavSection>
             <NavItem 
+              to="/add-model"
+              className={location.pathname === '/add-model' ? 'active' : ''}
+            >
+              <Package />
+              添加模型
+            </NavItem>
+            
+            <NavItem 
               to="/stats"
               className={location.pathname === '/stats' ? 'active' : ''}
             >

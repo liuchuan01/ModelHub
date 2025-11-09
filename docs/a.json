@@ -1,0 +1,64 @@
+{
+  "mappings": {
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "vector": {
+        "type": "dense_vector",
+        "dims": 1536
+      },
+      "payload": {
+        "properties": {
+          "filePath": {
+            "type": "text",
+            "analyzer": "path_analyzer"
+          },
+          "codeChunk": {
+            "type": "text"
+          },
+          "startLine": {
+            "type": "integer"
+          },
+          "endLine": {
+            "type": "integer"
+          },
+          "pathSegments": {
+            "properties": {
+              "0": {
+                "type": "keyword"
+              },
+              "1": {
+                "type": "keyword"
+              },
+              "2": {
+                "type": "keyword"
+              },
+              "3": {
+                "type": "keyword"
+              },
+              "4": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "path_analyzer": {
+          "tokenizer": "path_hierarchy"
+        }
+      },
+      "tokenizer": {
+        "path_hierarchy": {
+          "type": "path_hierarchy",
+          "delimiter": "/"
+        }
+      }
+    }
+  }
+}

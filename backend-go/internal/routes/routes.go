@@ -23,6 +23,7 @@ func SetupRoutes(cfg *config.Config) *gin.Engine {
 	// 初始化处理器
 	authHandler := handlers.NewAuthHandler(cfg)
 	modelHandler := handlers.NewModelHandler()
+	manufacturerHandler := handlers.NewManufacturerHandler()
 
 	// API路由组
 	api := router.Group("/api")
@@ -60,8 +61,15 @@ func SetupRoutes(cfg *config.Config) *gin.Engine {
 				models.DELETE("/:id", modelHandler.DeleteModel)
 			}
 
-			// 厂商相关（后续可扩展）
-			// manufacturers := authorized.Group("/manufacturers")
+			// 厂商相关
+			manufacturers := authorized.Group("/manufacturers")
+			{
+				manufacturers.GET("", manufacturerHandler.GetManufacturers)
+				manufacturers.POST("", manufacturerHandler.CreateManufacturer)
+				manufacturers.GET("/:id", manufacturerHandler.GetManufacturerByID)
+				manufacturers.PUT("/:id", manufacturerHandler.UpdateManufacturer)
+				manufacturers.DELETE("/:id", manufacturerHandler.DeleteManufacturer)
+			}
 
 			// 价格历史相关（后续可扩展）
 			// priceHistory := authorized.Group("/price-history")

@@ -8,6 +8,12 @@ export const manufacturerService = {
     const response = await apiClient.get('/manufacturers')
     return extractData<{ manufacturers: Manufacturer[] }>(response).manufacturers
   },
+  
+  // 创建新厂商
+  createManufacturer: async (name: string): Promise<Manufacturer> => {
+    const response = await apiClient.post('/manufacturers', { name })
+    return extractData<{ manufacturer: Manufacturer }>(response).manufacturer
+  },
 }
 
 export default manufacturerService
