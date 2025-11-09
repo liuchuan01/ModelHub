@@ -9,7 +9,8 @@ pub struct Model {
     pub id: i32,
     pub name: String,
     pub country: String,
-    pub active_period: Option<String>,
+    pub active_period_start: Option<chrono::NaiveDate>,
+    pub active_period_end: Option<chrono::NaiveDate>,
     #[sea_orm(ignore)]
     pub models_count: Option<i64>,
 }

@@ -50,7 +50,8 @@ where
         let manufacturer_data = manufacturer::ActiveModel {
             name: Set(request.name),
             country: Set(request.country),
-            active_period: Set(request.active_period),
+            active_period_start: Set(request.active_period_start),
+            active_period_end: Set(request.active_period_end),
             ..Default::default()
         };
 
@@ -76,9 +77,12 @@ where
             id: Set(existing_manufacturer.id),
             name: Set(request.name.unwrap_or(existing_manufacturer.name)),
             country: Set(request.country.unwrap_or(existing_manufacturer.country)),
-            active_period: Set(request
-                .active_period
-                .or(existing_manufacturer.active_period)),
+            active_period_start: Set(request
+                .active_period_start
+                .or(existing_manufacturer.active_period_start)),
+            active_period_end: Set(request
+                .active_period_end
+                .or(existing_manufacturer.active_period_end)),
             ..Default::default()
         };
 
@@ -99,7 +103,8 @@ where
             id: manufacturer.id,
             name: manufacturer.name,
             country: manufacturer.country,
-            active_period: manufacturer.active_period,
+            active_period_start: manufacturer.active_period_start,
+            active_period_end: manufacturer.active_period_end,
             models_count: manufacturer.models_count,
         }
     }
